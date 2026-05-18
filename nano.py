@@ -185,7 +185,7 @@ def run(prompt, previous=None):
 def load_sessions():
     try:
         return json.load(open(SESSIONS))
-    except FileNotFoundError, json.JSONDecodeError:
+    except  (FileNotFoundError, json.JSONDecodeError):
         return []
 
 
@@ -212,7 +212,7 @@ def repl(previous=None, label=None):
     while True:
         try:
             prompt = input(_color(36, "nano > ")).strip()
-        except EOFError, KeyboardInterrupt:
+        except (EOFError, KeyboardInterrupt):
             print()
             return
         if not prompt:
