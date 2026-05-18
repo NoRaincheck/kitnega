@@ -22,7 +22,7 @@ def _color(code, text):
     return f"\033[{code}m{text}\033[0m" if _TTY else text
 
 
-def _spinner(done, frames="-\\|/"):
+def _spinner(done, frames="⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏"):
     index = 0
     while not done.wait(0.1):
         print(f"\r  {_color(90, frames[index % len(frames)] + ' thinking')}", end="", file=sys.stderr, flush=True)
@@ -33,10 +33,10 @@ def _spinner(done, frames="-\\|/"):
 def find_files(roots, names, limit=40):
     home = os.path.expanduser("~")
     found = []
-    for root in map(os.path.expanduser, roots):
-        if not os.path.isdir(root):
+    for root_expanded in (os.path.expanduser(r) for r in roots):
+        if not os.path.isdir(root_expanded):
             continue
-        for base, dirs, files in os.walk(root):
+        for base, dirs, files in os.walk(root_expanded):
             dirs[:] = [d for d in dirs if d not in SKIP_DIRS]
             for name in (f for f in files if f.lower() in names):
                 path = os.path.abspath(os.path.join(base, name))
@@ -141,8 +141,8 @@ def respond(payload, previous=None):
         with urlopen(Request(API, json.dumps(body).encode(), headers=headers)) as api_response:
             return json.load(api_response)
     finally:
-        if spinner_thread:
-            spinner_done.set()
+        if spinner_thread and (sp := spinner_done):
+            sp.set()  # narrowed via walrus: Event | Never
             spinner_thread.join()
 
 
@@ -185,7 +185,7 @@ def run(prompt, previous=None):
 def load_sessions():
     try:
         return json.load(open(SESSIONS))
-    except  (FileNotFoundError, json.JSONDecodeError):
+    except FileNotFoundError, json.JSONDecodeError:
         return []
 
 
@@ -212,7 +212,7 @@ def repl(previous=None, label=None):
     while True:
         try:
             prompt = input(_color(36, "nano > ")).strip()
-        except (EOFError, KeyboardInterrupt):
+        except EOFError, KeyboardInterrupt:
             print()
             return
         if not prompt:
