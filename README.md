@@ -18,66 +18,59 @@ while not done:
 
 ```bash
 # Interactive REPL
-uv run python -m kitnega
+uv run cody
 
 # One-shot
-uv run python -m kitnega "fix the tests"
+uv run cody "fix the tests"
 
 # Pipe mode
-echo "explain the codebase" | uv run python -m kitnega
+echo "explain the codebase" | uv run cody
 
 # Continue last session
-uv run python -m kitnega -c
+uv run cody -c
 
 # Auto-approve (YOLO mode)
-KITNEGA_APPROVE=all uv run python -m kitnega "run tests and fix failures"
+CODY_APPROVE=all uv run cody "run tests and fix failures"
 ```
 
 ## Configuration
 
-Set via environment variables or a `models.json`-style config file:
+Set via environment variables:
 
 ```bash
-# Environment variables
-export KITNEGA_BASE_URL="http://localhost:1234/v1"
-export KITNEGA_MODEL="qwen3-coder-next"
-export KITNEGA_API_KEY="your-key"  # optional, for endpoints that require it
+export CODY_API="http://localhost:1234/v1/responses"
+export CODY_MODEL="qwen3-coder-next"
+export CODY_API_KEY="your-key"  # optional
 ```
 
-Or create `~/.kitnega/models.json`:
+## Workspaces
 
-```json
-{
-  "providers": {
-    "lmstudio": {
-      "baseUrl": "http://localhost:1234/v1",
-      "api": "openai-completions",
-      "apiKey": "unset",
-      "models": [
-        {"id": "qwen3-coder-next", "contextWindow": 100000, "maxTokens": 25000}
-      ]
-    }
-  }
-}
+This repository uses [uv workspaces](https://docs.astral.sh/uv/concepts/projects/workspaces/). The main package is `cody` (`cody/`).
+
+```bash
+uv sync              # install all workspace members
 ```
 
 ## Features
 
 - **Zero dependencies** — pure Python stdlib (urllib, subprocess, json)
-- **OpenAI-compatible** — works with LM Studio, Ollama, any `/chat/completions` endpoint
-- **Pipe-able** — `echo "prompt" | kitnega` for scripting
-- **Human-in-the-loop** — approve each tool call, or `--approve-all` / `KITNEGA_APPROVE=all`
+- **OpenAI-compatible** — works with LM Studio, Ollama, any Responses API endpoint
+- **Pipe-able** — `echo "prompt" | cody` for scripting
+- **Human-in-the-loop** — approve each write/edit/bash call, read-only tools skip approval
 - **Session persistence** — continue conversations with `-c` or pick with `-s`
-- **Auto context discovery** — finds AGENTS.md, README.md, CLAUDE.md, skill files
+- **Auto context discovery** — finds AGENTS.md, README.md, skill files
 
-## Tools
+## Built-in Tools
 
-| Tool | Description |
-|---|---|
-| `execute_shell` | Run shell commands (primary tool) |
-| `read_file` | Read file contents with optional line range |
-| `write_file` | Write content to a file |
-| `list_dir` | List directory contents |
+| Tool | Approval | Description |
+|---|---|---|
+| `read` | ❌ skip | Read file contents with optional line range |
+| `write` | ✅ required | Create or overwrite a file |
+| `edit` | ✅ required | Find/replace patch in a file |
+| `bash` | ✅ required | Run shell commands |
+| `grep` | ❌ skip | Search file contents with regex |
+| `find` | ❌ skip | Find files by glob pattern |
+| `ls` | ❌ skip | List directory contents |
 
 ## REPL Commands
 
@@ -85,6 +78,5 @@ Or create `~/.kitnega/models.json`:
 |---|---|
 | `:q` / `:quit` | Exit |
 | `:reset` | Reset conversation |
-| `:h` / `:help` | Show help |
-| `:session` | List recent sessions |
-| `:continue N` | Continue session by index |
+| `:load` | List recent sessions |
+| `:load <id>` | Continue a specific session |
