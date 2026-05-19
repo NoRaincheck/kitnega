@@ -25,6 +25,7 @@ code while working on a task — that can wait.
 - Add comments only when intent isn't clear from the code
 - Cache filesystem walks and external reads per-process where possible
 - Use `.gitignore` awareness in file-search tools (grep, find)
+- Use sqlite3 for a database if required. Remember that sqlite3 supports full text search (bm25)
 
 ## Testing
 

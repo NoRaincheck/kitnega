@@ -94,3 +94,10 @@ uv sync              # install all workspace members
 | `:reset`       | Reset conversation          |
 | `:load`        | List recent sessions        |
 | `:load <id>`   | Continue a specific session |
+
+## Inspired By
+
+- [pnegahdar/nano](https://github.com/pnegahdar/nano) — minimalist agentic
+coding workflow ideas
+- [badlogic/pi-mono](https://github.com/badlogic/pi-mono) — terminal-focused
+agent harness design
