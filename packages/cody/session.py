@@ -16,7 +16,8 @@ def _read():
     if _cache is not None:
         return _cache
     try:
-        _cache = json.load(open(SESSIONS))
+        with open(SESSIONS) as f:
+            _cache = json.load(f)
     except (FileNotFoundError, json.JSONDecodeError):
         _cache = []
     _dirty = False
@@ -24,12 +25,13 @@ def _read():
 
 
 def _flush():
-    global _dirty, _cache
+    global _dirty
     if not _dirty or _cache is None:
         return
     if len(_cache) > _MAX_SESSIONS:
-        _cache = _cache[-_MAX_SESSIONS:]
-    json.dump(_cache, open(SESSIONS, "w"))
+        _cache[:] = _cache[-_MAX_SESSIONS:]
+    with open(SESSIONS, "w") as f:
+        json.dump(_cache, f)
     _dirty = False
 
 

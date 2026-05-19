@@ -10,7 +10,6 @@ from .system_prompt import build_system_prompt
 
 MAX_STEPS = int(os.getenv("CODY_MAX_STEPS", "200"))
 APPROVE_ALL = os.getenv("CODY_APPROVE", "all").lower() == "all"
-_PARALLEL_TOOLS = APPROVE_ALL
 
 
 def _tool_def(name, desc, props, required):
@@ -22,10 +21,20 @@ def _tool_def(name, desc, props, required):
     }
 
 
+TOOL_SNIPPETS = {
+    "read": "Read a file's content, optionally limiting lines (1-indexed)",
+    "write": "Create or overwrite an entire file with given text",
+    "edit": "Replace one exact old_string match in a file with new_string",
+    "bash": "Run a shell command and capture output (with optional timeout/cwd/env)",
+    "grep": "Search files for lines matching a regex pattern, optionally filtering by glob",
+    "find": "Find files/dirs matching a glob pattern within a directory tree",
+    "ls": "List sorted entries in a directory, marking subdirs with /",
+}
+
 TOOLS = [
     _tool_def(
         "read",
-        "Read file contents with optional line range.",
+        TOOL_SNIPPETS["read"] + ".",
         {
             "path": {"type": "string", "description": "Path to the file"},
             "offset": {"type": "integer", "description": "Starting line (1-indexed), default 1"},
@@ -35,7 +44,7 @@ TOOLS = [
     ),
     _tool_def(
         "write",
-        "Create or overwrite a file with content.",
+        TOOL_SNIPPETS["write"] + ".",
         {
             "path": {"type": "string", "description": "Path to the file"},
             "content": {"type": "string", "description": "Content to write"},
@@ -44,7 +53,7 @@ TOOLS = [
     ),
     _tool_def(
         "edit",
-        "Replace text in a file using exact string matching.",
+        TOOL_SNIPPETS["edit"] + ".",
         {
             "path": {"type": "string", "description": "Path to the file"},
             "old_string": {"type": "string", "description": "Exact text to find and replace"},
@@ -54,7 +63,7 @@ TOOLS = [
     ),
     _tool_def(
         "bash",
-        "Run a shell command with inherited environment.",
+        TOOL_SNIPPETS["bash"] + ".",
         {
             "command": {"type": "string"},
             "description": {"type": "string", "description": "Why this command is useful, 5-10 words."},
@@ -66,7 +75,7 @@ TOOLS = [
     ),
     _tool_def(
         "grep",
-        "Search file contents using a regex pattern.",
+        TOOL_SNIPPETS["grep"] + ".",
         {
             "pattern": {"type": "string", "description": "Regex pattern to search for"},
             "include": {"type": "string", "description": "File glob pattern (e.g., *.py, *.txt)"},
@@ -76,7 +85,7 @@ TOOLS = [
     ),
     _tool_def(
         "find",
-        "Find files matching a glob pattern.",
+        TOOL_SNIPPETS["find"] + ".",
         {
             "pattern": {"type": "string", "description": "Glob pattern (e.g., **/*.py)"},
             "path": {"type": "string", "description": "Directory to search in"},
@@ -85,16 +94,13 @@ TOOLS = [
     ),
     _tool_def(
         "ls",
-        "List files and directories in a path.",
+        TOOL_SNIPPETS["ls"] + ".",
         {
             "path": {"type": "string", "description": "Directory to list"},
         },
         [],
     ),
 ]
-
-
-TOOL_SNIPPETS = {t["name"]: t["description"].rstrip(".") for t in TOOLS}
 
 
 def approve(args, requires_approval):
@@ -157,7 +163,7 @@ def tool_output(call):
 
 
 def _execute_calls(calls):
-    if _PARALLEL_TOOLS and len(calls) > 1:
+    if APPROVE_ALL and len(calls) > 1:
         by_id = {}
         with ThreadPoolExecutor() as pool:
             fut_map = {pool.submit(tool_output, c): c["call_id"] for c in calls}
