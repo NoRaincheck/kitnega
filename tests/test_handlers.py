@@ -3,7 +3,7 @@
 
 class TestHandleRead:
     def test_read_existing_file(self, tmp_path):
-        from packages.cody.handlers import _handle_read as h
+        from cody.handlers import _handle_read as h
 
         target = tmp_path / "test.txt"
         target.write_text("hello\nworld")

@@ -3,14 +3,14 @@ requires = ["setuptools>=64"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "cody"
+name = "duncan"
 version = "0.1.0"
 description = "Minimal Python coding agent using stdlib"
 requires-python = ">=3.14"
 dependencies = []
 
 [project.scripts]
-cody = "cody.__main__:main"
+duncan = "duncan.__main__:main"
 
 [dependency-groups]
 dev = [
@@ -20,7 +20,7 @@ dev = [
 ]
 
 [tool.setuptools.packages.find]
-where = ["."]
+include = ["duncan*"]
 
 [tool.ruff]
 line-length = 120
