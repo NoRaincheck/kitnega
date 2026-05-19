@@ -19,10 +19,12 @@ Do not refactor unrelated code while working on a task — that can wait.
 
 ## Coding rules
 
-- Keep files under 150 lines, functions small and focused
+- Keep files under 200 lines, functions small and focused
 - Prefer explicit over clever; use boring, consistent names
 - Leave `__init__.py` empty
 - Add comments only when intent isn't clear from the code
+- Cache filesystem walks and external reads per-process where possible
+- Use `.gitignore` awareness in file-search tools (grep, find)
 
 ## Testing
 

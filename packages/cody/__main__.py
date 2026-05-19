@@ -11,7 +11,7 @@ def repl(previous=None, label=None):
     while True:
         try:
             prompt = input(_color(36, "cody > ")).strip()
-        except EOFError, KeyboardInterrupt:
+        except (EOFError, KeyboardInterrupt):
             print()
             return
         if not prompt:
@@ -39,7 +39,8 @@ def repl(previous=None, label=None):
         answer, previous = run(prompt, previous)
         if not label:
             label = prompt
-        save_session(previous, label)
+        if previous:
+            save_session(previous, label)
         print(answer)
 
 
@@ -72,7 +73,8 @@ def main():
     prompt_text = " ".join(args.prompt)
     if prompt_text:
         answer, response_id = run(prompt_text, previous)
-        save_session(response_id, label or prompt_text)
+        if response_id:
+            save_session(response_id, label or prompt_text)
         print(answer)
     else:
         repl(previous, label)

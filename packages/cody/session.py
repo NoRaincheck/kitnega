@@ -5,24 +5,49 @@ import time
 from ._shared import CWD, _color
 
 SESSIONS = os.path.expanduser("~/.cody_sessions.json")
+_MAX_SESSIONS = 50
+
+_cache = None
+_dirty = False
+
+
+def _read():
+    global _cache, _dirty
+    if _cache is not None:
+        return _cache
+    try:
+        _cache = json.load(open(SESSIONS))
+    except (FileNotFoundError, json.JSONDecodeError):
+        _cache = []
+    _dirty = False
+    return _cache
+
+
+def _flush():
+    global _dirty, _cache
+    if not _dirty or _cache is None:
+        return
+    if len(_cache) > _MAX_SESSIONS:
+        _cache = _cache[-_MAX_SESSIONS:]
+    json.dump(_cache, open(SESSIONS, "w"))
+    _dirty = False
 
 
 def load_sessions():
-    try:
-        return json.load(open(SESSIONS))
-    except FileNotFoundError, json.JSONDecodeError:
-        return []
+    return _read()
 
 
 def save_session(response_id, label):
-    sessions = load_sessions()
-    sessions = [s for s in sessions if not (s["label"] == label and s["cwd"] == CWD)]
+    sessions = _read()
+    sessions[:] = [s for s in sessions if not (s["label"] == label and s["cwd"] == CWD)]
     sessions.append({"id": response_id, "label": label[:80], "cwd": CWD, "ts": int(time.time())})
-    json.dump(sessions[-50:], open(SESSIONS, "w"))
+    global _dirty
+    _dirty = True
+    _flush()
 
 
 def list_sessions():
-    sessions = [s for s in load_sessions() if s["cwd"] == CWD][-10:]
+    sessions = [s for s in _read() if s["cwd"] == CWD][-10:]
     if not sessions:
         print(_color(90, "no sessions in this directory"))
         return

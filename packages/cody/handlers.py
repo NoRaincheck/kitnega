@@ -3,10 +3,47 @@ import glob
 import os
 import re
 import subprocess
+from pathlib import Path
 
 from ._shared import CWD
 
 SKIP_DIRS = {".git", ".venv", "__pycache__", "node_modules", "venv", ".ruff_cache"}
+_GITIGNORE_CACHE = {}
+_GITIGNORE_MTIME = {}
+
+
+def _load_dir_skip(root):
+    """Return a set of directory names to skip — built-in SKIP_DIRS plus .gitignore rules.
+
+    For each `.gitignore` found (root + any parent up to ~), extract the
+    bare directory-name patterns (e.g. `build/`, `dist`, `.next/`) so callers
+    can skip them during `os.walk` directory pruning.
+    """
+    ignored = set()
+    start = Path(root).resolve()
+    for parent in [start, *start.parents]:
+        gi = parent / ".gitignore"
+        try:
+            mtime = gi.stat().st_mtime
+        except OSError:
+            continue
+        if _GITIGNORE_CACHE.get(gi) is not None and _GITIGNORE_MTIME.get(gi) == mtime:
+            ignored.update(_GITIGNORE_CACHE[gi])
+            continue
+        patterns = set()
+        try:
+            for line in gi.read_text().splitlines():
+                line = line.strip()
+                if not line or line.startswith("#") or line.startswith("!"):
+                    continue
+                name = line.rstrip("/")
+                patterns.add(name)
+        except Exception:
+            pass
+        _GITIGNORE_CACHE[gi] = patterns
+        _GITIGNORE_MTIME[gi] = mtime
+        ignored.update(patterns)
+    return SKIP_DIRS | ignored
 
 
 def _handle_read(args):
@@ -92,9 +129,10 @@ def _handle_grep(args):
     root = args.get("path") or CWD
     if not os.path.isdir(root):
         return f"error: directory not found: {root}"
+    skip = _load_dir_skip(root)
     matches = []
     for base, dirs, files in os.walk(root):
-        dirs[:] = [d for d in dirs if d not in SKIP_DIRS]
+        dirs[:] = [d for d in dirs if d not in skip]
         for file in files:
             if include and not fnmatch.fnmatch(file, include):
                 continue
@@ -121,10 +159,11 @@ def _handle_find(args):
     root = args.get("path") or CWD
     if not os.path.isdir(root):
         return f"error: directory not found: {root}"
+    skip = _load_dir_skip(root)
     matches = []
     for entry in glob.glob(pattern, root_dir=root, recursive=True):
         parts = entry.replace(os.sep, "/").split("/")
-        if any(p in SKIP_DIRS for p in parts):
+        if any(p in skip for p in parts):
             continue
         matches.append(entry)
         if len(matches) >= 200:

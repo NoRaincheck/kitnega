@@ -1,6 +1,7 @@
 import json
 import os
 import sys
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from ._shared import CWD, _color
 from .client import respond, text
@@ -9,6 +10,7 @@ from .system_prompt import build_system_prompt
 
 MAX_STEPS = int(os.getenv("CODY_MAX_STEPS", "200"))
 APPROVE_ALL = os.getenv("CODY_APPROVE", "all").lower() == "all"
+_PARALLEL_TOOLS = APPROVE_ALL
 
 
 def _tool_def(name, desc, props, required):
@@ -154,13 +156,29 @@ def tool_output(call):
     return {"type": "function_call_output", "call_id": call["call_id"], "output": result}
 
 
+def _execute_calls(calls):
+    if _PARALLEL_TOOLS and len(calls) > 1:
+        by_id = {}
+        with ThreadPoolExecutor() as pool:
+            fut_map = {pool.submit(tool_output, c): c["call_id"] for c in calls}
+            for fut in as_completed(fut_map):
+                by_id[fut_map[fut]] = fut.result()
+        return [by_id[c["call_id"]] for c in calls]
+    return [tool_output(call) for call in calls]
+
+
+def _session_id(response):
+    sid = response.get("id")
+    return sid if isinstance(sid, str) and sid else None
+
+
 def run(prompt, previous=None):
     tool_names = [t["name"] for t in TOOLS]
     system = build_system_prompt(cwd=CWD, selected_tools=tool_names, tool_snippets=TOOL_SNIPPETS)
-    response = respond(prompt, system, TOOLS, previous)
-    for _ in range(MAX_STEPS):
+    response = respond(prompt, system, TOOLS, previous, step=0)
+    for step in range(1, MAX_STEPS + 1):
         calls = [x for x in response.get("output", []) if x.get("type") == "function_call"]
         if not calls:
-            return text(response), response["id"]
-        response = respond([tool_output(call) for call in calls], system, TOOLS, response["id"])
-    return "stopped: too many tool calls", response["id"]
+            return text(response), _session_id(response)
+        response = respond(_execute_calls(calls), system, TOOLS, _session_id(response), step=step)
+    return "stopped: too many tool calls", _session_id(response)

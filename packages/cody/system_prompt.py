@@ -6,7 +6,13 @@ from datetime import date
 SKIP_DIRS = {".git", ".venv", "__pycache__", "node_modules", "venv", ".ruff_cache", ".pytest_cache"}
 
 
+_CONTEXT_CACHE = {}
+
+
 def _find_context_files(roots, names, limit=40):
+    key = (tuple(roots), tuple(sorted(names)), limit)
+    if key in _CONTEXT_CACHE:
+        return _CONTEXT_CACHE[key]
     home = os.path.expanduser("~")
     found = []
     for root_expanded in (os.path.expanduser(r) for r in roots):
@@ -18,8 +24,12 @@ def _find_context_files(roots, names, limit=40):
                 path = os.path.abspath(os.path.join(base, name))
                 found.append("~" + path[len(home) :] if path.startswith(home + os.sep) else os.path.relpath(path))
                 if len(found) >= limit:
-                    return ", ".join(sorted(dict.fromkeys(found)))
-    return ", ".join(sorted(dict.fromkeys(found))) or "none"
+                    result = ", ".join(sorted(dict.fromkeys(found)))
+                    _CONTEXT_CACHE[key] = result
+                    return result
+    result = ", ".join(sorted(dict.fromkeys(found))) or "none"
+    _CONTEXT_CACHE[key] = result
+    return result
 
 
 def _format_skills_for_prompt(skills):
