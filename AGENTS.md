@@ -2,8 +2,8 @@
 
 ## Project
 
-`uv`-managed Python workspace with one member package: `cody` (`cody/`).
-At its core it should only use Python stdlib.
+`uv`-managed Python workspace with one member package: `cody` (`cody/`). At its
+core it should only use Python stdlib.
 
 ## Workflow
 
@@ -13,9 +13,9 @@ At its core it should only use Python stdlib.
 
 ## Change discipline
 
-Keep changes small and focused. Make one logical change at a time.
-This prevents context overload for both humans and automated tools.
-Do not refactor unrelated code while working on a task — that can wait.
+Keep changes small and focused. Make one logical change at a time. This prevents
+context overload for both humans and automated tools. Do not refactor unrelated
+code while working on a task — that can wait.
 
 ## Coding rules
 
@@ -28,8 +28,8 @@ Do not refactor unrelated code while working on a task — that can wait.
 
 ## Testing
 
-Focused tests for core behavior and edge cases. Run via `uv run`.
-Tests live in `tests/` under the member package or workspace root.
+Focused tests for core behavior and edge cases. Run via `uv run`. Tests live in
+`tests/` under the member package or workspace root.
 
 ## Decision rule
 

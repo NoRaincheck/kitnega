@@ -1,9 +1,5 @@
-import json
-import os
-import sys
-import threading
+import json, os, sys, threading
 from urllib.request import Request, urlopen
-
 from ._shared import _TTY, _color
 
 API = os.getenv("CODY_API", "http://localhost:1234/v1/responses")
@@ -14,28 +10,15 @@ USE_STREAM = os.getenv("CODY_STREAM", "1") in ("1", "true", "yes", "")
 def api_key():
     return os.getenv("CODY_API_KEY") or ""
 
-
-_THINK_PHRASES = [
-    "Expanding Horizons...",
-    "Unloading Loading Screens...",
-    "Mediating Modifiers...",
-    "Reticulating 4-D Splines...",
-    "Ascending Maslow's Hierarchy...",
-    "Mapping the Llama Genome...",
-    "Tabulating Traits...",
-    "Calibrating Social Distance...",
-    "Threading Fabric Compositors...",
-    "Texture-Compositing Teddy Bears...",
-]
+# Single consistent spinner text for multi-round sessions — no phase cycling.
+_SPINNER_TEXT = "Working..."
 
 
-def _spinner(done, step=0, frames="⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏"):
+def _spinner(done, frames="⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏"):
     index = 0
-    phrase = _THINK_PHRASES[step % len(_THINK_PHRASES)]
     while not done.wait(0.1):
-        print(f"\r{_color(90, frames[index % len(frames)] + ' ' + phrase)}", end="", file=sys.stderr, flush=True)
+        print(f"\r{_color(90, frames[index % len(frames)] + ' ' + _SPINNER_TEXT)}", end="", file=sys.stderr, flush=True)
         index += 1
-    # don't clear — next output (spinner or text) overwrites via \r
 
 
 def _build_body(payload, system, tools, previous, stream):
@@ -89,8 +72,7 @@ def _stream_respond(body, headers, spinner_done=None):
                 if delta:
                     had_content = True
                     if first_delta:
-                        if spinner_done:
-                            spinner_done.set()
+                        spinner_done and spinner_done.set()
                         print(file=sys.stderr, flush=True)
                         first_delta = False
                     print(_color(90, delta), end="", file=sys.stderr, flush=True)
@@ -99,21 +81,19 @@ def _stream_respond(body, headers, spinner_done=None):
     return had_content, body
 
 
-def respond(payload, system, tools, previous=None, step=0):
+def respond(payload, system, tools, previous=None):
     stream = USE_STREAM
     body = _build_body(payload, system, tools, previous, stream)
     headers = _headers()
     spinner_done = threading.Event() if _TTY else None
-    spinner_thread = threading.Thread(target=_spinner, args=(spinner_done, step), daemon=True) if spinner_done else None
+    thread_args = (spinner_done,) if spinner_done else ()
+    spinner_thread = threading.Thread(target=_spinner, args=thread_args, daemon=True) if spinner_done else None
     if spinner_thread:
         spinner_thread.start()
     had_content = False
     try:
-        if stream:
-            had_content, resp = _stream_respond(body, headers, spinner_done)
-            return resp
-        with _request(body, headers) as r:
-            return json.load(r)
+        return _stream_respond(body, headers, spinner_done)[1] if stream \
+            else json.load(_request(body, headers))
     finally:
         if spinner_thread and (sp := spinner_done):
             sp.set()
