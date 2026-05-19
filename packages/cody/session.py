@@ -18,7 +18,7 @@ def _read():
     try:
         with open(SESSIONS) as f:
             _cache = json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError):
+    except FileNotFoundError, json.JSONDecodeError:
         _cache = []
     _dirty = False
     return _cache

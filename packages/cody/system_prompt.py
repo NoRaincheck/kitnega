@@ -92,7 +92,7 @@ def build_system_prompt(
     tools = selected_tools or ["read", "bash", "edit", "write"]
     tool_snippets = tool_snippets or {}
     visible_tools = [t for t in tools if t in tool_snippets]
-    tools_list = "\n".join(f"- {t}: {tool_snippets[t]}" for t in visible_tools) if visible_tools else "(none)"
+    tools_list = ", ".join(visible_tools) if visible_tools else "(none)"
 
     guidelines_list = []
     guidelines_set = set()
@@ -128,10 +128,7 @@ def build_system_prompt(
 
     prompt = f"""You are an expert coding assistant operating inside Cody, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.
 
-Available tools:
-{tools_list}
-
-In addition to the tools above, you may have access to other custom tools depending on the project.
+Available tools: {tools_list}
 
 Guidelines:
 {guidelines}

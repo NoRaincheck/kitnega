@@ -1,13 +1,17 @@
-import json, os, sys
+import json
+import os
+import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
+
 from ._shared import CWD, _color
-from .client import respond, text
-from .handlers import (_handle_bash, _handle_edit, _handle_find, _handle_grep,
-                       _handle_ls, _handle_read, _handle_write)
+from .client import USE_STREAM, respond, text
+from .handlers import _handle_bash, _handle_edit, _handle_find, _handle_grep, _handle_ls, _handle_read, _handle_write
 from .system_prompt import build_system_prompt
 
-MAX_STEPS = int(os.getenv("CODY_MAX_STEPS", "200"))
+MAX_STEPS = int(os.getenv("CODY_MAX_STEPS", "20"))
 APPROVE_ALL = os.getenv("CODY_APPROVE", "all").lower() == "all"
+_READONLY_TOOLS = frozenset({"read", "grep", "find", "ls"})
+_RESULT_CACHE = {}
 
 
 def _tool_def(name, desc, props, required):
@@ -15,8 +19,7 @@ def _tool_def(name, desc, props, required):
         "type": "function",
         "name": name,
         "description": desc,
-        "parameters": {"type": "object", "properties": props, "required": required,
-                       "additionalProperties": False},
+        "parameters": {"type": "object", "properties": props, "required": required, "additionalProperties": False},
     }
 
 
@@ -27,85 +30,200 @@ TOOL_SNIPPETS = {
     "bash": "Run a shell command and capture output (with optional timeout/cwd/env)",
     "grep": "Search files for lines matching a regex pattern, optionally filtering by glob",
     "find": "Find files/dirs matching a glob pattern within a directory tree",
-    "ls":  "List sorted entries in a directory, marking subdirs with /",
+    "ls": "List sorted entries in a directory, marking subdirs with /",
 }
 
+_PROP_DESC = {
+    "path": "Target file or directory path",
+    "content": "Full file content to write",
+    "old_string": "Exact string to match (must appear exactly once)",
+    "new_string": "Replacement string",
+    "command": "Shell command to execute",
+    "description": "Short human-readable summary of what the command does",
+    "cwd": "Working directory (defaults to project root)",
+    "timeout": "Timeout in seconds (default 60)",
+    "pattern": "Search pattern",
+    "include": "Glob filter (e.g. *.py)",
+    "offset": "Starting line number, 1-indexed",
+    "limit": "Maximum lines to return",
+}
+
+
+def _prop(name, t):
+    return {**{"type": t}, "description": _PROP_DESC[name]}
+
+
 TOOLS = [
-    _tool_def("read", TOOL_SNIPPETS["read"] + ".",
-              {"path": {"type": "string"},
-               "offset": {"type": "integer"}, "limit": {"type": "integer"}}, ["path"]),
-    _tool_def("write", TOOL_SNIPPETS["write"] + ".",
-              {"path": {"type": "string"}, "content": {"type": "string"}}, ["path","content"]),
-    _tool_def("edit", TOOL_SNIPPETS["edit"] + ".",
-              {"path":{"type":"string"},"old_string":{"type":"string"},"new_string":{"type":"string"}},
-              ["path","old_string","new_string"]),
-    _tool_def("bash", TOOL_SNIPPETS["bash"] + ".",
-              {"command": {"type":"string"}, "description": {"type":"string"},
-               "cwd": {"type":["string","null"]}, "timeout":{"type":"integer"}},
-              ["command","description"]),
-    _tool_def("grep", TOOL_SNIPPETS["grep"] + ".",
-              {"pattern":{"type":"string"},"include":{"type":"string"},"path":{"type":"string"}},
-              ["pattern"]),
-    _tool_def("find", TOOL_SNIPPETS["find"] + ".",
-              {"pattern":{"type":"string"},"path":{"type":"string"}}, ["pattern"]),
-    _tool_def("ls", TOOL_SNIPPETS["ls"] + ".",
-              {"path": {"type":"string"}}, []),
+    _tool_def(
+        "read",
+        TOOL_SNIPPETS["read"] + ".",
+        {"path": _prop("path", "string"), "offset": _prop("offset", "integer"), "limit": _prop("limit", "integer")},
+        ["path"],
+    ),
+    _tool_def(
+        "write",
+        TOOL_SNIPPETS["write"] + ".",
+        {"path": _prop("path", "string"), "content": _prop("content", "string")},
+        ["path", "content"],
+    ),
+    _tool_def(
+        "edit",
+        TOOL_SNIPPETS["edit"] + ".",
+        {
+            "path": _prop("path", "string"),
+            "old_string": _prop("old_string", "string"),
+            "new_string": _prop("new_string", "string"),
+        },
+        ["path", "old_string", "new_string"],
+    ),
+    _tool_def(
+        "bash",
+        TOOL_SNIPPETS["bash"] + ".",
+        {
+            "command": _prop("command", "string"),
+            "description": _prop("description", "string"),
+            "cwd": _prop("cwd", ["string", "null"]),
+            "timeout": _prop("timeout", "integer"),
+        },
+        ["command", "description"],
+    ),
+    _tool_def(
+        "grep",
+        TOOL_SNIPPETS["grep"] + ".",
+        {
+            "pattern": _prop("pattern", "string"),
+            "include": _prop("include", "string"),
+            "path": _prop("path", "string"),
+        },
+        ["pattern"],
+    ),
+    _tool_def(
+        "find",
+        TOOL_SNIPPETS["find"] + ".",
+        {"pattern": _prop("pattern", "string"), "path": _prop("path", "string")},
+        ["pattern"],
+    ),
+    _tool_def("ls", TOOL_SNIPPETS["ls"] + ".", {"path": _prop("path", "string")}, []),
 ]
 
 
 def approve(args, requires_approval):
-    if not requires_approval: return True
+    if not requires_approval:
+        return True
     global APPROVE_ALL
-    desc = args.get("description","")
-    if desc: print(f"\n{_color(90,'# '+desc)}",file=sys.stderr)
-    for k,v in {k:v for k,v in args.items() if k!="description" and v is not None}.items():
-        val=v if len(str(v))<80 else str(v)[:77]+"..."
-        print(f"{_color(32,k)}: {_color(90,val)}",file=sys.stderr)
-    if APPROVE_ALL: return True
-    try: choice=input("Approve? [y]yes  [a]all  [n]no: ").strip().lower()
-    except EOFError: return False
-    if choice in ("a","all"): APPROVE_ALL=True; return True
-    return choice in ("y","yes")
+    for k, v in {k: v for k, v in args.items() if k != "description" and v is not None}.items():
+        val = v if len(str(v)) < 80 else str(v)[:77] + "..."
+        print(f"{_color(32, k)}: {_color(90, val)}", file=sys.stderr)
+    if APPROVE_ALL:
+        return True
+    try:
+        choice = input("Approve? [y]yes  [a]all  [n]no: ").strip().lower()
+    except EOFError:
+        return False
+    if choice in ("a", "all"):
+        APPROVE_ALL = True
+        return True
+    return choice in ("y", "yes")
 
 
-NEEDS_APPROVAL = {"write","edit","bash"}
+NEEDS_APPROVAL = {"write", "edit", "bash"}
 
-TOOL_HANDLERS={"read":_handle_read,"write":_handle_write,"edit":_handle_edit,
-               "bash":_handle_bash,"grep":_handle_grep,"find":_handle_find,"ls":_handle_ls}
+TOOL_HANDLERS = {
+    "read": _handle_read,
+    "write": _handle_write,
+    "edit": _handle_edit,
+    "bash": _handle_bash,
+    "grep": _handle_grep,
+    "find": _handle_find,
+    "ls": _handle_ls,
+}
+
+
+def _cache_key(call):
+    args = json.loads(call.get("arguments") or "{}")
+    return (call["name"], json.dumps(args, sort_keys=True))
 
 
 def tool_output(call):
     handler = TOOL_HANDLERS.get(call["name"])
-    if not handler: return {"type":"function_call_output","call_id":call["call_id"],"output":"unknown"}
-    try: args=json.loads(call.get("arguments") or "{}")
-    except json.JSONDecodeError as e: result=f"bad arguments: {e}"
+    if not handler:
+        sys.stderr.write(_color(31, f"[{call['name']}] unknown tool\n"))
+        return {"type": "function_call_output", "call_id": call["call_id"], "output": "unknown"}
+
+    is_readonly = call["name"] in _READONLY_TOOLS
+    if is_readonly:
+        key = _cache_key(call)
+        cached = _RESULT_CACHE.get(key)
+        if cached is not None:
+            return {"type": "function_call_output", "call_id": call["call_id"], "output": cached}
+
+    try:
+        args = json.loads(call.get("arguments") or "{}")
+    except json.JSONDecodeError as e:
+        sys.stderr.write(_color(31, f"[{call['name']}] bad arguments: {e}\n"))
+        result = f"bad arguments: {e}"
     else:
-        if call["name"]=="bash":
-            words=args.get("description","").split()
-            if not 5<=len(words)<=10: return {"type":"function_call_output",
-                "call_id":call["call_id"],"output":"bad arguments: description must be 5-10 words"}
-        result=handler(args) if approve(args,call["name"] in NEEDS_APPROVAL)\
-            else _color(31,"denied by user")
-    return {"type":"function_call_output","call_id":call["call_id"],"output":result}
+        if call["name"] == "bash":
+            words = args.get("description", "").split()
+            if len(words) == 0:
+                sys.stderr.write(_color(31, f"[{call['name']}] description must not be empty\n"))
+                return {
+                    "type": "function_call_output",
+                    "call_id": call["call_id"],
+                    "output": "bad arguments: description must not be empty",
+                }
+        result = handler(args) if approve(args, call["name"] in NEEDS_APPROVAL) else _color(31, "denied by user")
+
+    if is_readonly:
+        _RESULT_CACHE[key] = result
+    else:
+        _RESULT_CACHE.clear()
+
+    return {"type": "function_call_output", "call_id": call["call_id"], "output": result}
 
 
 def _execute_calls(calls):
-    if APPROVE_ALL and len(calls)>1:
-        by_id={}
+    groups = {}
+    for c in calls:
+        key = _cache_key(c)
+        groups.setdefault(key, []).append(c)
+
+    uniques = [g[0] for g in groups.values()]
+    if APPROVE_ALL and len(uniques) > 1:
+        by_id = {}
         with ThreadPoolExecutor() as pool:
-            fmap={pool.submit(tool_output,c):c["call_id"] for c in calls}
-            for f in as_completed(fmap): by_id[fmap[f]]=f.result()
-        return [by_id[c["call_id"]]for c in calls]
-    return[tool_output(call)for call in calls]
+            fmap = {pool.submit(tool_output, c): c["call_id"] for c in uniques}
+            for f in as_completed(fmap):
+                by_id[fmap[f]] = f.result()
+        first_results = by_id
+    else:
+        first_results = {c["call_id"]: tool_output(c) for c in uniques}
+
+    result_by_key = {}
+    for c in uniques:
+        result_by_key[_cache_key(c)] = first_results[c["call_id"]]
+
+    return [{**result_by_key[_cache_key(c)], "call_id": c["call_id"]} for c in calls]
 
 
 def run(prompt, previous=None):
-    tool_names=[t["name"] for t in TOOLS]
-    system=build_system_prompt(cwd=CWD,selected_tools=tool_names,tool_snippets=TOOL_SNIPPETS)
-    response = respond(prompt,system,TOOLS,previous)
+    tool_names = [t["name"] for t in TOOLS]
+    system = build_system_prompt(cwd=CWD, selected_tools=tool_names, tool_snippets=TOOL_SNIPPETS)
+    response = respond(prompt, system, TOOLS, previous)
     for _round in range(MAX_STEPS):
-        calls=[x for x in response.get("output",[])if x.get("type")=="function_call"]
-        if not calls: return text(response),response.get("id","")
-        payload=_execute_calls(calls) if calls else None
+        calls = [x for x in response.get("output", []) if x.get("type") == "function_call"]
+        if not calls:
+            if USE_STREAM:
+                return "", response.get("id", "")
+            return text(response), response.get("id", "")
+        sys.stderr.write("\r\033[K")
+        for call in calls:
+            args = json.loads(call.get("arguments") or "{}")
+            params = ", ".join(
+                f"{k}={str(v) if len(str(v)) < 60 else str(v)[:57] + '...'}" for k, v in args.items() if v is not None
+            )
+            sys.stderr.write(_color(90, f"» {call['name']}({params})\n"))
+        sys.stderr.flush()
+        sys.stdout.flush()
+        payload = _execute_calls(calls) if calls else None
         response = respond(payload, system, TOOLS, response.get("id"))
-

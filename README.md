@@ -1,5 +1,7 @@
 # kitnega
 
+> agenti(k) backwards
+
 A minimal agentic coding harness using only Python stdlib.
 
 ```

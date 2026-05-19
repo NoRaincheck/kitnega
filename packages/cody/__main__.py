@@ -1,17 +1,27 @@
-import argparse
 import sys
 
 from ._shared import CWD, _color
-from .session import list_sessions, load_sessions, save_session
-from .tools import run
+
+
+def _get_run():
+    from .tools import run
+    return run
+
+
+def _get_session():
+    from .session import list_sessions, load_sessions, save_session
+    return list_sessions, load_sessions, save_session
 
 
 def repl(previous=None, label=None):
+    from .session import list_sessions, load_sessions, save_session
+    from .tools import run
+
     print(_color(1, "cody") + " repl " + _color(90, "(:quit, :reset, :load)"))
     while True:
         try:
             prompt = input(_color(36, "cody > ")).strip()
-        except (EOFError, KeyboardInterrupt):
+        except EOFError, KeyboardInterrupt:
             print()
             return
         if not prompt:
@@ -41,10 +51,13 @@ def repl(previous=None, label=None):
             label = prompt
         if previous:
             save_session(previous, label)
-        print(answer)
+        if answer:
+            print(answer)
 
 
 def main():
+    import argparse
+
     parser = argparse.ArgumentParser(description="cody — a minimal coding agent")
     group = parser.add_mutually_exclusive_group()
     group.add_argument("-s", "--sessions", action="store_true", help="list available sessions and start repl")
@@ -61,9 +74,13 @@ def main():
     previous, label = None, None
 
     if args.sessions:
+        list_sessions, _, _ = _get_session()
         print(_color(90, "use :load <id> in the repl to resume a session"))
         list_sessions()
-    elif args.cont:
+        return
+
+    if args.cont:
+        _, load_sessions, _ = _get_session()
         sessions = [s for s in load_sessions() if s.get("cwd") == CWD]
         if not sessions:
             sys.exit("no sessions in this directory")
@@ -72,10 +89,14 @@ def main():
 
     prompt_text = " ".join(args.prompt)
     if prompt_text:
+        run = _get_run()
+        _, _, save_session = _get_session()
         answer, response_id = run(prompt_text, previous)
         if response_id:
             save_session(response_id, label or prompt_text)
-        print(answer)
+        if answer:
+            sys.stdout.write(f"{answer}\n")
+            sys.stdout.flush()
     else:
         repl(previous, label)
 
