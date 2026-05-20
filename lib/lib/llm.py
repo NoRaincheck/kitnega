@@ -1,3 +1,23 @@
+"""Prompt an LLM via an OpenAI-compatible /v1/responses API.
+
+This module provides a simple ``prompt()`` function and a CLI entry point
+for sending prompts to an LLM and retrieving the text response.
+
+Example
+-------
+    >>> import os
+    >>> os.environ["CODY_API"] = "http://localhost:1234/v1/responses"
+    >>> from lib.llm import prompt
+    >>> result = prompt("What is 2+2?")
+    >>> print(result)
+    4
+
+Or from the command line:
+
+    $ echo "What is 2+2?" | python -m lib.llm
+    4
+"""
+
 import argparse
 import json
 import os

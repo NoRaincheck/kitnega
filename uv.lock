@@ -4,11 +4,23 @@ requires-python = ">=3.14"
 
 [manifest]
 members = [
+    "carly",
     "cody",
     "duncan",
     "kitnega",
     "lib",
 ]
+
+[[package]]
+name = "carly"
+version = "0.1.0"
+source = { editable = "carly" }
+dependencies = [
+    { name = "lib" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "lib", editable = "lib" }]
 
 [[package]]
 name = "cody"
@@ -83,6 +95,7 @@ name = "kitnega"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
+    { name = "carly" },
     { name = "cody" },
     { name = "duncan" },
     { name = "lib" },
@@ -97,6 +110,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "carly", editable = "carly" },
     { name = "cody", editable = "cody" },
     { name = "duncan", editable = "duncan" },
     { name = "lib", editable = "lib" },
