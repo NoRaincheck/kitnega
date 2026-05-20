@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "merlin"
+version = "0.1.0"
+description = "ML library using random-split trees (isoforest, mondrian)"
+requires-python = ">=3.14"
+dependencies = ["lib"]
+
+[project.scripts]
+merlin = "merlin.__main__:main"
+
+[tool.setuptools.packages.find]
+include = ["merlin*"]
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I001"]

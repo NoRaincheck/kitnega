@@ -23,7 +23,7 @@ code while working on a task — that can wait.
 
 ## Coding rules
 
-- Keep files under 200 lines, functions small and focused
+- Keep files between 150-500 LoC, functions small and focused
 - Prefer explicit over clever; use boring, consistent names
 - Leave `__init__.py` empty
 - Add comments only when intent isn't clear from the code

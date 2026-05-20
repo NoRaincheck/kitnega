@@ -3,19 +3,22 @@ name = "kitnega"
 version = "0.1.0"
 description = "Minimal Python workspace for agent tools"
 requires-python = ">=3.14"
-dependencies = ["carly", "cody", "duncan", "lib"]
+dependencies = ["carly", "cody", "duncan", "lib", "merlin"]
 
 [tool.uv.workspace]
-members = ["carly", "cody", "duncan", "lib"]
+members = ["carly", "cody", "duncan", "lib", "merlin"]
 
 [tool.uv.sources]
 carly = { workspace = true }
 cody = { workspace = true }
 duncan = { workspace = true }
 lib = { workspace = true }
+merlin = { workspace = true }
 
 [dependency-groups]
 dev = [
+    "onnx>=1.21.0",
+    "onnxruntime>=1.26.0",
     "pytest>=9.0.3",
     "ruff>=0.15.13",
     "ty>=0.0.37",

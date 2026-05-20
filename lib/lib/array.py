@@ -684,3 +684,58 @@ def zeros(shape, dtype="float64"):
 
 def empty(shape, dtype="float64"):
     return ndarray(shape, dtype)
+
+
+def arange(*args, dtype="float64"):
+    start, step = 0, 1
+    if len(args) == 1:
+        stop = args[0]
+    elif len(args) == 2:
+        start, stop = args
+    elif len(args) == 3:
+        start, stop, step = args
+    else:
+        raise TypeError(f"arange requires 1-3 arguments, got {len(args)}")
+    size = _ceildiv(stop - start, step)
+    if size <= 0:
+        return empty((0,), dtype)
+    out = empty((size,), dtype)
+    for i in range(size):
+        out[i] = start + i * step
+    return out
+
+
+def eye(N, M=None, dtype="float64"):
+    if M is None:
+        M = N
+    out = zeros((N, M), dtype)
+    for i in range(min(N, M)):
+        out[i, i] = 1
+    return out
+
+
+def unique(arr):
+    if not isinstance(arr, ndarray):
+        arr = array(arr)
+    seen = set()
+    for v in arr.flat:
+        seen.add(v)
+    result = sorted(seen)
+    out_type = "int32" if all(isinstance(v, int) for v in result) else "float64"
+    out = empty((len(result),), out_type)
+    for i, v in enumerate(result):
+        out[i] = v
+    return out
+
+
+def bincount(arr, minlength=0):
+    if not isinstance(arr, ndarray):
+        arr = array(arr)
+    if arr.size == 0:
+        return [0] * minlength
+    max_val = int(max(arr.flat))
+    length = max(minlength, max_val + 1)
+    result = [0] * length
+    for v in arr.flat:
+        result[int(v)] += 1
+    return result
