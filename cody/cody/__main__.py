@@ -5,11 +5,13 @@ from ._shared import CWD, _color
 
 def _get_run():
     from .tools import run
+
     return run
 
 
 def _get_session():
     from .session import list_sessions, load_sessions, save_session
+
     return list_sessions, load_sessions, save_session
 
 
@@ -91,6 +93,7 @@ def main():
     prompt_text = " ".join(args.prompt)
     if prompt_text:
         from .tools import refine_prompt
+
         run = _get_run()
         _, _, save_session = _get_session()
         if not args.seed:

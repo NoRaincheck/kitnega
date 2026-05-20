@@ -17,6 +17,7 @@ include = ["lib*"]
 
 [tool.ruff]
 line-length = 120
+extend-exclude = ["lib/bottle.py"]
 
 [tool.ruff.lint]
 select = ["E4", "E7", "E9", "F", "I001"]

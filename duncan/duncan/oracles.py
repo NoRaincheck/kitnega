@@ -29,13 +29,17 @@ def npc(dice, description=""):
     notable = d.weighted(TN.NOTABLE_FEATURES)
     clothing = d.weighted(TN.CLOTHING)
 
-    appearance = _join([f"{height} {build}",
-                        f"{skin} skin",
-                        f"{hair_color} hair, {hair_style}",
-                        f"{eyes} eyes",
-                        face,
-                        notable,
-                        clothing])
+    appearance = _join(
+        [
+            f"{height} {build}",
+            f"{skin} skin",
+            f"{hair_color} hair, {hair_style}",
+            f"{eyes} eyes",
+            face,
+            notable,
+            clothing,
+        ]
+    )
 
     mannerism = d.weighted(TN.MANNERISMS)
     quirk = d.weighted(TN.QUIRKS)

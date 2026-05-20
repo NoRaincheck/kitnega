@@ -156,8 +156,10 @@ def _generate(oracle_type, seed, description, refine=False):
     filtered = False
     if refine and description:
         desc = description.lower()
+
         def _bias(item):
             return item.lower() in desc
+
         bias = _bias
         filtered = True
     dice = Dice(seed=seed or description or None, bias=bias, filtered=filtered)
