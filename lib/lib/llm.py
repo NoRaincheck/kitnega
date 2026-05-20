@@ -1,5 +1,7 @@
+import argparse
 import json
 import os
+import sys
 from urllib.request import Request, urlopen
 
 API = os.getenv("CODY_API", "http://localhost:1234/v1/responses")
@@ -39,4 +41,25 @@ def _text(data):
             for part in item.get("content", []):
                 if part.get("type") == "output_text":
                     text += part.get("text", "")
-    return text
+    return text.strip()
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Prompt an LLM and print the response")
+    parser.add_argument("--system", "-s", default="You are a helpful assistant.", help="System prompt / instructions")
+    parser.add_argument("--model", "-m", default=None, help="Model override")
+    parser.add_argument("--timeout", "-t", type=int, default=300, help="Request timeout in seconds")
+    parser.add_argument("input", nargs="*", help="Input text (read from stdin if omitted)")
+    args = parser.parse_args()
+
+    input_text = " ".join(args.input) if args.input else sys.stdin.read().strip()
+    if not input_text:
+        parser.print_usage()
+        sys.exit(1)
+
+    try:
+        result = prompt(input_text, system=args.system, model=args.model, timeout=args.timeout)
+        print(result)
+    except Exception as e:
+        print(f"Error: {e}", file=sys.stderr)
+        sys.exit(1)

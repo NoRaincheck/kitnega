@@ -9,6 +9,9 @@ description = "Shared utilities for kitnega workspace members"
 requires-python = ">=3.14"
 dependencies = []
 
+[project.scripts]
+llm = "lib.llm:main"
+
 [tool.setuptools.packages.find]
 include = ["lib*"]
 
