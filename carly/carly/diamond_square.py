@@ -172,33 +172,54 @@ def _border_seed_points(hw: int, hh: int, region_count: int) -> list[tuple[float
     return pts
 
 
-def voronoi_normalize(terrain: list[list[float]], num_regions: int, seed: int | None) -> list[list[float]]:
+def voronoi_normalize(
+    terrain: list[list[float]], num_regions: int, seed: int | None, relaxation_iters: int = 0
+) -> list[list[float]]:
     h = len(terrain)
     w = len(terrain[0])
     rng = random.Random(seed)
-    points: list[tuple[float, float]] = [
-        (rng.random() * h, rng.random() * w) for _ in range(max(1, num_regions))
+
+    inner_count = max(1, num_regions)
+    inner_points: list[tuple[float, float]] = [
+        (rng.random() * h, rng.random() * w) for _ in range(inner_count)
     ]
-    points.extend(_border_seed_points(w, h, num_regions))
+    border_points = _border_seed_points(w, h, num_regions)
+    all_points = inner_points + border_points
+    num_points = len(all_points)
 
-    sums: list[float] = [0.0] * len(points)
-    counts: list[int] = [0] * len(points)
-    labels: list[list[int]] = [[0] * w for _ in range(h)]
+    for iteration in range(relaxation_iters + 1):
+        do_relax = iteration < relaxation_iters
+        sums = [0.0] * num_points
+        counts = [0] * num_points
+        labels = [[0] * w for _ in range(h)]
 
-    for y in range(h):
-        for x in range(w):
-            best_d = float("inf")
-            best_i = 0
-            for i, (py, px) in enumerate(points):
-                d = (y - py) * (y - py) + (x - px) * (x - px)
-                if d < best_d:
-                    best_d = d
-                    best_i = i
-            labels[y][x] = best_i
-            sums[best_i] += terrain[y][x]
-            counts[best_i] += 1
+        if do_relax:
+            sum_y = [0.0] * num_points
+            sum_x = [0.0] * num_points
 
-    means = [sums[i] / (counts[i] or 1) for i in range(len(points))]
+        for y in range(h):
+            for x in range(w):
+                best_d = float("inf")
+                best_i = 0
+                for i, (py, px) in enumerate(all_points):
+                    d = (y - py) * (y - py) + (x - px) * (x - px)
+                    if d < best_d:
+                        best_d = d
+                        best_i = i
+                labels[y][x] = best_i
+                sums[best_i] += terrain[y][x]
+                counts[best_i] += 1
+                if do_relax:
+                    sum_y[best_i] += y
+                    sum_x[best_i] += x
+
+        if do_relax:
+            for i in range(inner_count):
+                if counts[i] > 0:
+                    inner_points[i] = (sum_y[i] / counts[i], sum_x[i] / counts[i])
+            all_points = inner_points + border_points
+
+    means = [sums[i] / (counts[i] or 1) for i in range(num_points)]
 
     result = [[0.0] * w for _ in range(h)]
     for y in range(h):
@@ -227,7 +248,7 @@ def generate_sampled_heightmaps(
     )
     high_res = apply_edge_ocean_falloff(high_res, edge_water_falloff)
     if use_voronoi and voronoi_regions > 0:
-        high_res = voronoi_normalize(high_res, voronoi_regions, seed)
+        high_res = voronoi_normalize(high_res, voronoi_regions, seed, relaxation_iters=voronoi_regions)
         high_res = apply_edge_ocean_falloff(high_res, edge_water_falloff)
 
     area_means: list[list[float]] = [[0.0] * width for _ in range(height)]
