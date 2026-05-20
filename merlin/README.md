@@ -88,6 +88,61 @@ merlin's `ExtraForestClassifier`/`ExtraForestRegressor` share the same core idea
 - **Lifetime parameter** controls tree depth but node creation in `partial_fit` follows a simpler logic than the paper's cascade.
 - No support for `n_jobs` (always single-threaded).
 
+## SHAP values
+
+merlin includes a built-in TreeSHAP implementation for feature attribution — no external library needed.
+
+```python
+from merlin.forest import RandomForest
+
+rf = RandomForest(n_estimators=10, task="regressor", split="best", random_state=42)
+rf.fit(X, y)
+
+# Standalone call
+shap_values, bias = rf.shap_values(X)
+# shap_values shape: (n_samples, n_features)
+# bias: expected prediction (float)
+
+# Or via the output_shap flag
+preds, shap_values, bias = rf.predict(X, output_shap=True)
+```
+
+For classifiers, `shap_values` returns per-class attributions:
+
+```python
+clf = RandomForest(n_estimators=10, task="classifier", split="best", random_state=42)
+clf.fit(X, y)
+
+shap_values, bias = clf.shap_values(X)
+# shap_values shape: (n_samples, n_features, n_classes)
+# bias: expected probability per class (list of length n_classes)
+
+probs, shap_values, bias = clf.predict_proba(X, output_shap=True)
+```
+
+The SHAP decomposition satisfies `Σ φ + bias = prediction` for every sample.
+
+### How it works
+
+merlin implements the polynomial-time TreeSHAP algorithm (Lundberg et al. 2017)
+using a per-leaf subset enumeration approach. Each leaf categorises path features
+into *toward* (x follows the same direction) and *away* (x goes opposite), and
+computes contributions using Shapley kernel weights that account for both
+path and non-path features. Repeated features on a path are collapsed
+automatically.
+
+Key implementation details:
+- **Complexity**: `O(T · L · 2^a)` per sample, where `T` = trees, `L` = leaves, `a` ≤ max unique toward features on a single path. For typical shallow trees (depth ≤ 10) this is very fast.
+- **Bias**: Computed once per tree (independent of sample) as the expected value over the training distribution.
+- **Classifier**: Runs TreeSHAP independently per class using normalised per-class probabilities from each leaf.
+- **No dependencies**: Pure Python stdlib + `lib.array`.
+
+### Limitations
+
+- No support for anomaly detection (`task="anomaly"`) — SHAP values are only meaningful for regressor and classifier tasks.
+- For deep trees (depth > 15) with many features, the per-leaf 2^a enumeration may become slow. Trees with ≤ 150 leaves and ≤ 10 unique toward features per leaf complete in milliseconds.
+- Classifier SHAP runs one TreeSHAP pass per class, adding linear overhead in the number of classes.
+
 ### General
 
 - All computations are in pure Python — no numpy, no C extensions.

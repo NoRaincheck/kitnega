@@ -9,6 +9,7 @@ A monorepo with three stdlib-only tools for different domains:
 | `cody`  | Agentic coding harness — LLM-powered coding agent |
 | `duncan` | TTRPG procedural oracle — dice-driven random generation |
 | `carly` | Procedural map generator — diamond-square + Voronoi |
+| `merlin` | Random-split forests (ExtraTrees, IsolationForest, Mondrian) with built-in TreeSHAP |
 
 ## cody
 
