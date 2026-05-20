@@ -18,9 +18,8 @@ wheels/
 *.swp
 *.swo
 
-# Kitnega config (keep models.json out of VCS if it has keys)
-.kitnega.json
-kitnega.json
+# Kitnega config directory (local SQLite dbs, secrets, session files)
+.kitnega/
 
 # OS
 .DS_Store

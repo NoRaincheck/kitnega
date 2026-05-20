@@ -6,7 +6,7 @@ import pytest
 @pytest.fixture(autouse=True)
 def _clean_cody_state(monkeypatch):
     """Reset cached state in cody modules before each test."""
-    monkeypatch.delenv("CODY_API", raising=False)  # disable real API calls by default
+    monkeypatch.delenv("KN_API", raising=False)  # disable real API calls by default
 
 
 @pytest.fixture()

@@ -8,8 +8,8 @@ from .client import USE_STREAM, respond, text
 from .handlers import _handle_bash, _handle_edit, _handle_find, _handle_grep, _handle_ls, _handle_read, _handle_write
 from .system_prompt import build_system_prompt
 
-MAX_STEPS = int(os.getenv("CODY_MAX_STEPS", "20"))
-APPROVE_ALL = os.getenv("CODY_APPROVE", "all").lower() == "all"
+MAX_STEPS = int(os.getenv("KN_MAX_STEPS", "20"))
+APPROVE_ALL = os.getenv("KN_APPROVE", "all").lower() == "all"
 _READONLY_TOOLS = frozenset({"read", "grep", "find", "ls"})
 _RESULT_CACHE = {}
 

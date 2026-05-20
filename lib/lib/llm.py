@@ -6,7 +6,7 @@ for sending prompts to an LLM and retrieving the text response.
 Example
 -------
     >>> import os
-    >>> os.environ["CODY_API"] = "http://localhost:1234/v1/responses"
+    >>> os.environ["KN_API"] = "http://localhost:1234/v1/responses"
     >>> from lib.llm import prompt
     >>> result = prompt("What is 2+2?")
     >>> print(result)
@@ -24,12 +24,12 @@ import os
 import sys
 from urllib.request import Request, urlopen
 
-API = os.getenv("CODY_API", "http://localhost:1234/v1/responses")
-MODEL = os.getenv("CODY_MODEL", "qwen3.6-35b-a3b")
+API = os.getenv("KN_API", "http://localhost:1234/v1/responses")
+MODEL = os.getenv("KN_MODEL", "qwen3.6-35b-a3b")
 
 
 def _api_key():
-    return os.getenv("CODY_API_KEY") or ""
+    return os.getenv("KN_API_KEY") or ""
 
 
 def _headers():

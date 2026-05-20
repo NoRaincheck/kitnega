@@ -12,6 +12,7 @@ members = [
     "cody",
     "duncan",
     "kitnega",
+    "klaus",
     "lib",
     "merlin",
 ]
@@ -111,6 +112,7 @@ dependencies = [
     { name = "carly" },
     { name = "cody" },
     { name = "duncan" },
+    { name = "klaus" },
     { name = "lib" },
     { name = "merlin" },
 ]
@@ -129,6 +131,7 @@ requires-dist = [
     { name = "carly", editable = "carly" },
     { name = "cody", editable = "cody" },
     { name = "duncan", editable = "duncan" },
+    { name = "klaus", editable = "klaus" },
     { name = "lib", editable = "lib" },
     { name = "merlin", editable = "merlin" },
 ]
@@ -141,6 +144,17 @@ dev = [
     { name = "ruff", specifier = ">=0.15.13" },
     { name = "ty", specifier = ">=0.0.37" },
 ]
+
+[[package]]
+name = "klaus"
+version = "0.1.0"
+source = { editable = "klaus" }
+dependencies = [
+    { name = "lib" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "lib", editable = "lib" }]
 
 [[package]]
 name = "lib"

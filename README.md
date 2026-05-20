@@ -2,7 +2,7 @@
 
 > agenti(k) backwards
 
-A monorepo with three stdlib-only tools for different domains:
+A monorepo with stdlib-only packages for different domains:
 
 | Package | Role |
 | ------- | ---- |
@@ -10,6 +10,7 @@ A monorepo with three stdlib-only tools for different domains:
 | `duncan` | TTRPG procedural oracle — dice-driven random generation |
 | `carly` | Procedural map generator — diamond-square + Voronoi |
 | `merlin` | Random-split forests (ExtraTrees, IsolationForest, Mondrian) with built-in TreeSHAP |
+| `klaus` | Minimal Slack clone — Bottle + htmx + sqlite3 chat server |
 
 ## cody
 
@@ -46,7 +47,7 @@ uv run cody -c
 uv run cody -s
 
 # Auto-approve (YOLO mode) — also enables parallel tool execution
-CODY_APPROVE=all uv run cody "run tests and fix failures"
+KN_APPROVE=all uv run cody "run tests and fix failures"
 ```
 
 ### Configuration
@@ -54,11 +55,11 @@ CODY_APPROVE=all uv run cody "run tests and fix failures"
 Set via environment variables:
 
 ```bash
-export CODY_API="http://localhost:1234/v1/responses"
-export CODY_MODEL="qwen3.6-35b-a3b"
-export CODY_API_KEY="your-key"  # optional
-export CODY_STREAM="1"          # enable SSE streaming for real-time output (default: 1)
-export CODY_MAX_STEPS="20"      # max tool call iterations (default: 20)
+export KN_API="http://localhost:1234/v1/responses"
+export KN_MODEL="qwen3.6-35b-a3b"
+export KN_API_KEY="your-key"  # optional
+export KN_STREAM="1"          # enable SSE streaming for real-time output (default: 1)
+export KN_MAX_STEPS="20"      # max tool call iterations (default: 20)
 ```
 
 ### Features
@@ -124,6 +125,17 @@ Sample output (32×24 tiles, rivers enabled):
 
 ![Sample map](tests/sample-map.png)
 
+## merlin
+
+Random-split forests (ExtraTrees, IsolationForest, Mondrian) with built-in
+TreeSHAP. Stdlib + `lib.array` only.
+
+See [merlin/README.md](merlin/README.md) for full docs.
+
+```bash
+uv run merlin --help
+```
+
 ## Workspace
 
 This repository uses
@@ -134,6 +146,9 @@ uv sync              # install all workspace members
 uv run cody <cmd>    # run the coding agent
 uv run duncan <cmd>  # run the TTRPG oracle
 uv run carly <args>  # run the map generator
+uv run merlin       # run ML experiments
+uv run klaus serve    # start the chat server
+uv run klaus init-db  # initialize DB (fails if exists; add --force to reset)
 uv run pytest        # run tests
 uv run ruff check    # lint
 ```

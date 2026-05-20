@@ -4,7 +4,7 @@ import time
 
 from ._shared import CWD, _color
 
-SESSIONS = os.path.expanduser("~/.cody_sessions.json")
+SESSIONS = os.path.expanduser("~/.kitnega/sessions.json")
 _MAX_SESSIONS = 50
 
 _cache = None

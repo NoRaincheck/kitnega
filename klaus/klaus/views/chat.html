@@ -1,0 +1,149 @@
+% rebase("layout")
+<div class="chat-layout">
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <span>klaus</span>
+      <a href="#" hx-get="/rooms" hx-target="#room-list" hx-swap="innerHTML"
+         onclick="showModal(); return false;">+ New</a>
+    </div>
+    <div id="room-list" class="room-list" hx-trigger="load, every 10s" hx-get="/rooms" hx-swap="innerHTML">
+      % include("_room_list", rooms=rooms, user=user)
+    </div>
+    <div class="sidebar-footer">
+      <span>{{user["username"]}}</span>
+      <form action="/logout" method="POST" style="display:inline">
+        <button type="submit" class="btn btn-sm" style="background:#475569;color:#cbd5e1">Sign out</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="main-area">
+    % if active_room:
+    <div class="chat-header">
+      <div>
+        <h2>{{active_room.get("title") or active_room["name"]}}
+          % if not active_room["is_public"]:
+          <span class="tag tag-private">DM</span>
+          % end
+        </h2>
+        % if active_room.get("topic") and not active_room["name"].startswith("_dm_"):
+        <div class="topic">{{active_room["topic"]}}</div>
+        % end
+      </div>
+      <div class="actions">
+        % if not active_room["is_public"]:
+        <form action="/rooms/{{active_room['id']}}/toggle-visibility" method="POST" style="display:inline">
+          <button class="btn btn-sm" style="background:#fef3c7;color:#92400e">Make public</button>
+        </form>
+        % end
+        <form action="/rooms/{{active_room['id']}}/leave" method="POST" style="display:inline"
+              hx-confirm="Leave this room?">
+          <button class="btn btn-sm btn-danger">Leave</button>
+        </form>
+      </div>
+    </div>
+    <div id="messages" class="message-list"
+         hx-trigger="every 3s" hx-get="/rooms/{{active_room['id']}}/messages" hx-swap="innerHTML"
+         hx-target="#messages">
+      % include("_messages", messages=messages, active_room=active_room, user=user, render_content=render_content)
+    </div>
+    <div class="chat-input">
+      <form id="msg-form" action="/rooms/{{active_room['id']}}/messages" method="POST"
+            hx-post="/rooms/{{active_room['id']}}/messages"
+            hx-target="#messages" hx-swap="beforeend">
+        <input id="msg-input" type="text" name="content" placeholder="Type a message... (@username to mention)" required autofocus>
+        <button type="submit" class="btn btn-primary">Send</button>
+      </form>
+    </div>
+    % else:
+    <div class="empty-state">
+      <h3>Welcome to klaus</h3>
+      <p>Select a room from the sidebar or create a new one.</p>
+      % if not rooms:
+      <p style="margin-top:12px">No rooms yet. <a href="#" hx-get="/rooms" hx-target="#room-list"
+         onclick="showModal()">Create one</a>.</p>
+      % end
+      <div style="margin-top:24px">
+        <form action="/register" method="GET">
+          <button class="btn btn-primary">Invite people — Share the link</button>
+        </form>
+      </div>
+    </div>
+    % end
+  </div>
+</div>
+
+<div id="room-modal" class="modal-overlay" style="display:none" onclick="if(event.target===this)hideModal()">
+  <div class="modal">
+    <div class="tab-bar">
+      <button class="tab active" data-tab="room" onclick="switchTab('room')">Room</button>
+      <button class="tab" data-tab="dm" onclick="switchTab('dm')">Message</button>
+    </div>
+    <div id="tab-room" class="tab-content active">
+      <h3>Create a room</h3>
+      <form action="/rooms" method="POST">
+        <div class="form-group">
+          <label>Room name</label>
+          <input type="text" name="name" required placeholder="e.g. random-room" pattern="[a-zA-Z0-9 -]+">
+        </div>
+        <div class="form-group">
+          <label>Topic (optional)</label>
+          <input type="text" name="topic" placeholder="What's this room about?">
+        </div>
+        <div class="form-group">
+          <label>
+            <input type="checkbox" name="is_public" value="1" checked>
+            Public (anyone can join)
+          </label>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn" onclick="hideModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create</button>
+        </div>
+      </form>
+    </div>
+    <div id="tab-dm" class="tab-content">
+      <h3>Send a message</h3>
+      <form hx-post="/dm" hx-target="#dm-result">
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" name="username" required placeholder="Enter the recipient's username">
+        </div>
+        <div id="dm-result" style="color:#dc2626;font-size:13px;margin-bottom:8px"></div>
+        <div class="modal-actions">
+          <button type="button" class="btn" onclick="hideModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Send</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+function showModal() { document.getElementById('room-modal').style.display = 'flex'; }
+function hideModal() { document.getElementById('room-modal').style.display = 'none'; }
+function switchTab(name) {
+  document.querySelectorAll('.tab-bar .tab').forEach(function(t) { t.classList.remove('active'); });
+  document.querySelectorAll('.tab-content').forEach(function(t) { t.classList.remove('active'); });
+  document.querySelector('.tab-bar .tab[data-tab="' + name + '"]').classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+}
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') hideModal();
+});
+document.addEventListener('click', function(e) {
+  var modal = document.getElementById('room-modal');
+  if (e.target === modal) hideModal();
+});
+var msgForm = document.getElementById('msg-form');
+if (msgForm) {
+  msgForm.addEventListener('htmx:after-swap', function() {
+    this.reset();
+    document.getElementById('msg-input').focus();
+  });
+  msgForm.addEventListener('htmx:afterSwap', function() {
+    this.reset();
+    document.getElementById('msg-input').focus();
+  });
+}
+</script>

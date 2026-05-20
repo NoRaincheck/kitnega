@@ -8,7 +8,7 @@ from lib.llm import API, MODEL
 
 from ._shared import _TTY, _color
 
-USE_STREAM = os.getenv("CODY_STREAM", "1") in ("1", "true", "yes", "")
+USE_STREAM = os.getenv("KN_STREAM", "1") in ("1", "true", "yes", "")
 
 _SPINNER_TEXT = "Working..."
 
@@ -31,7 +31,7 @@ def _build_body(payload, system, tools, previous, stream):
 
 def _headers():
     headers = {"Content-Type": "application/json"}
-    key = os.getenv("CODY_API_KEY") or ""
+    key = os.getenv("KN_API_KEY") or ""
     if key:
         headers["Authorization"] = f"Bearer {key}"
     return headers
