@@ -5,6 +5,8 @@
 `uv`-managed Python workspace with two member packages: `cody` (`cody/`) and
 `duncan` (`duncan/`). At their core both should only use Python stdlib.
 
+`lib` contains single file modules that maybe vendored. Avoid modifying where possible.
+
 ## Workflow
 
 - `uv sync` — install all workspace members
