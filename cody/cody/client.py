@@ -4,16 +4,11 @@ import sys
 import threading
 from urllib.request import Request, urlopen
 
+from lib.llm import API, MODEL
+
 from ._shared import _TTY, _color
 
-API = os.getenv("CODY_API", "http://localhost:1234/v1/responses")
-MODEL = os.getenv("CODY_MODEL", "qwen3.6-35b-a3b")
 USE_STREAM = os.getenv("CODY_STREAM", "1") in ("1", "true", "yes", "")
-
-
-def api_key():
-    return os.getenv("CODY_API_KEY") or ""
-
 
 _SPINNER_TEXT = "Working..."
 
@@ -36,7 +31,7 @@ def _build_body(payload, system, tools, previous, stream):
 
 def _headers():
     headers = {"Content-Type": "application/json"}
-    key = api_key()
+    key = os.getenv("CODY_API_KEY") or ""
     if key:
         headers["Authorization"] = f"Bearer {key}"
     return headers
@@ -66,7 +61,6 @@ def _sse_events(response):
                 yield event_type, json.loads(data_str)
 
 
-# Reasoning delta events — different providers name them differently.
 _REASONING_EVENTS = frozenset(
     (
         "response.reasoning.delta",
@@ -76,12 +70,6 @@ _REASONING_EVENTS = frozenset(
 
 
 def _stream_respond(body, headers, spinner_done=None):
-    """Stream an SSE response, returning (had_content, response_dict).
-
-    Reasoning deltas are printed to stdout in grey (once per contiguous
-    reasoning block).  All other SSE events are accumulated into a response
-    dict matching the non-streaming JSON shape.
-    """
     had_content = False
     response = {}
     output_items = []
@@ -97,7 +85,6 @@ def _stream_respond(body, headers, spinner_done=None):
             if delta_str:
                 had_content = True
 
-            # Reasoning → print in grey, prefixed with "> " once per block
             if is_reasoning_event and delta_str:
                 if not in_reasoning:
                     if spinner_done:
@@ -110,7 +97,6 @@ def _stream_respond(body, headers, spinner_done=None):
             elif in_reasoning:
                 in_reasoning = False
 
-            # Accumulate the response object from SSE events
             if event_type == "response.created":
                 response = data.get("response", {})
             elif event_type == "response.output_item.added":
@@ -166,8 +152,9 @@ def _stream_respond(body, headers, spinner_done=None):
     return had_content, response
 
 
-def respond(payload, system, tools, previous=None):
-    stream = USE_STREAM
+def respond(payload, system, tools, previous=None, stream=None):
+    if stream is None:
+        stream = USE_STREAM
     body = _build_body(payload, system, tools, previous, stream)
     headers = _headers()
     spinner_done = threading.Event() if _TTY else None

@@ -206,6 +206,20 @@ def _execute_calls(calls):
     return [{**result_by_key[_cache_key(c)], "call_id": c["call_id"]} for c in calls]
 
 
+REFINE_SYSTEM = (
+    "You are a prompt refinement engine. Your only job is to take a user's "
+    "request and expand it into a clear, detailed set of instructions for a "
+    "coding agent. Be specific. Include what files might need to be read, "
+    "what commands might need to be run, and what changes might need to be made. "
+    "Output only the refined instructions, no preamble or commentary."
+)
+
+
+def refine_prompt(prompt):
+    response = respond(prompt, REFINE_SYSTEM, [], previous=None, stream=False)
+    return text(response)
+
+
 def run(prompt, previous=None):
     tool_names = [t["name"] for t in TOOLS]
     system = build_system_prompt(cwd=CWD, selected_tools=tool_names, tool_snippets=TOOL_SNIPPETS)

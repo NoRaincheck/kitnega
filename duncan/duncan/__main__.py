@@ -2,7 +2,7 @@ import argparse
 import sys
 
 from .oracle import Dice
-from .oracles import adventure_hook, oracle, encounter, event, faction, location, npc, rune, weapon
+from .oracles import adventure_hook, encounter, event, faction, location, npc, oracle, rune, weapon
 from .prompt import classify_oracle_type
 
 ORACLES = {
@@ -19,43 +19,123 @@ ORACLES = {
 
 _INTENT_KEYWORDS = {
     "npc": [
-        "npc", "character", "person", "someone", "merchant",
-        "guard", "priest", "thief", "blacksmith", "innkeeper",
-        "wizard", "ranger", "knight", "peasant", "lord",
-        "lady", "villager", "stranger", "ally", "villain",
-        "elf", "dwarf", "orc", "hag", "troll", "ogre",
+        "npc",
+        "character",
+        "person",
+        "someone",
+        "merchant",
+        "guard",
+        "priest",
+        "thief",
+        "blacksmith",
+        "innkeeper",
+        "wizard",
+        "ranger",
+        "knight",
+        "peasant",
+        "lord",
+        "lady",
+        "villager",
+        "stranger",
+        "ally",
+        "villain",
+        "elf",
+        "dwarf",
+        "orc",
+        "hag",
+        "troll",
+        "ogre",
     ],
     "event": [
-        "event", "happen", "scenario", "incident", "occurrence",
-        "situation", "development", "happening",
+        "event",
+        "happen",
+        "scenario",
+        "incident",
+        "occurrence",
+        "situation",
+        "development",
+        "happening",
     ],
     "location": [
-        "location", "place", "tavern", "dungeon", "forest",
-        "temple", "shop", "castle", "cave", "ruin", "town",
-        "city", "village", "inn", "library", "market",
-        "tower", "pass", "swamp", "hills",
+        "location",
+        "place",
+        "tavern",
+        "dungeon",
+        "forest",
+        "temple",
+        "shop",
+        "castle",
+        "cave",
+        "ruin",
+        "town",
+        "city",
+        "village",
+        "inn",
+        "library",
+        "market",
+        "tower",
+        "pass",
+        "swamp",
+        "hills",
     ],
     "faction": [
-        "faction", "guild", "order", "cult", "kingdom",
-        "clan", "society", "group", "organization",
-        "druid", "orc clan", "tribe",
+        "faction",
+        "guild",
+        "order",
+        "cult",
+        "kingdom",
+        "clan",
+        "society",
+        "group",
+        "organization",
+        "druid",
+        "orc clan",
+        "tribe",
     ],
     "encounter": [
-        "encounter", "monster", "creature", "beast", "ambush",
-        "combat", "fight", "battle", "enemy", "enemies",
-        "statue", "lizard", "demon", "skeleton", "wolf", "zombie",
+        "encounter",
+        "monster",
+        "creature",
+        "beast",
+        "ambush",
+        "combat",
+        "fight",
+        "battle",
+        "enemy",
+        "enemies",
+        "statue",
+        "lizard",
+        "demon",
+        "skeleton",
+        "wolf",
+        "zombie",
     ],
     "hook": [
-        "hook", "adventure", "quest", "patron", "mission",
+        "hook",
+        "adventure",
+        "quest",
+        "patron",
+        "mission",
     ],
     "oracle": [
-        "oracle", "action", "theme", "spark", "inspiration",
+        "oracle",
+        "action",
+        "theme",
+        "spark",
+        "inspiration",
     ],
     "weapon": [
-        "weapon", "equipment", "gear", "arm", "sword", "bow",
+        "weapon",
+        "equipment",
+        "gear",
+        "arm",
+        "sword",
+        "bow",
     ],
     "rune": [
-        "rune", "rune magic", "rune magic",
+        "rune",
+        "rune magic",
+        "rune magic",
     ],
 }
 
@@ -71,8 +151,16 @@ def _detect_intent(text):
     return best if scores[best] > 0 else "event"
 
 
-def _generate(oracle_type, seed, description):
-    dice = Dice(seed=seed or description or None)
+def _generate(oracle_type, seed, description, refine=False):
+    bias = None
+    filtered = False
+    if refine and description:
+        desc = description.lower()
+        def _bias(item):
+            return item.lower() in desc
+        bias = _bias
+        filtered = True
+    dice = Dice(seed=seed or description or None, bias=bias, filtered=filtered)
     gen = ORACLES[oracle_type]
     result = gen(dice, description or "")
     header = f"seed: {seed or 'random'}" if seed else ""
@@ -100,22 +188,29 @@ def main():
             "Examples:\n"
             "  duncan npc\n"
             "  duncan hook --seed tavern42\n"
-            "  duncan \"a ruined tower in the mountains\"\n"
-            "  duncan location \"abandoned mine\" --seed 8675309\n"
+            '  duncan "a ruined tower in the mountains"\n'
+            '  duncan location "abandoned mine" --seed 8675309\n'
         ),
     )
     parser.add_argument(
-        "--seed", "-s",
+        "--seed",
+        "-s",
         default=None,
         help="Seed for reproducible generation (string or number)",
     )
     parser.add_argument(
-        "--prompt", "-p",
+        "--prompt",
+        "-p",
         action="store_true",
         help="Use LLM to infer oracle type from description instead of keyword matching",
     )
-    parser.add_argument("tokens", nargs="*",
-                        help="Oracle type followed by description")
+    parser.add_argument(
+        "--refine",
+        "-r",
+        action="store_true",
+        help="Bias table rolls toward keywords in the description",
+    )
+    parser.add_argument("tokens", nargs="*", help="Oracle type followed by description")
 
     args = parser.parse_args()
     tokens = args.tokens
@@ -138,7 +233,7 @@ def main():
             parser.print_help()
             return
 
-    result = _generate(oracle_type, args.seed, desc)
+    result = _generate(oracle_type, args.seed, desc, refine=args.refine)
     sys.stdout.write(result + "\n")
 
 

@@ -3,14 +3,15 @@ name = "kitnega"
 version = "0.1.0"
 description = "Minimal Python workspace for agent tools"
 requires-python = ">=3.14"
-dependencies = ["cody", "duncan"]
+dependencies = ["cody", "duncan", "lib"]
 
 [tool.uv.workspace]
-members = ["cody", "duncan"]
+members = ["cody", "duncan", "lib"]
 
 [tool.uv.sources]
 cody = { workspace = true }
 duncan = { workspace = true }
+lib = { workspace = true }
 
 [dependency-groups]
 dev = [

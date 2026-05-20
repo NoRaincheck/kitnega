@@ -68,6 +68,7 @@ def main():
         action="store_true",
         help="load last session in current directory, then run prompt or enter repl",
     )
+    parser.add_argument("--seed", action="store_true", help="use prompt as-is without refinement")
     parser.add_argument("prompt", nargs="*", help="command to execute (omitted for interactive mode)")
 
     args = parser.parse_args()
@@ -89,8 +90,12 @@ def main():
 
     prompt_text = " ".join(args.prompt)
     if prompt_text:
+        from .tools import refine_prompt
         run = _get_run()
         _, _, save_session = _get_session()
+        if not args.seed:
+            print(_color(90, "refining prompt..."), file=sys.stderr)
+            prompt_text = refine_prompt(prompt_text)
         answer, response_id = run(prompt_text, previous)
         if response_id:
             save_session(response_id, label or prompt_text)

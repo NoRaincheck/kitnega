@@ -212,18 +212,18 @@ class TestAdventureHook:
         assert "Beware:" in result
 
 
-class TestD66:
-    def test_d66_returns_string(self):
+class TestOracle:
+    def test_oracle_returns_string(self):
         from duncan.oracle import Dice
-        from duncan.oracles import d66
+        from duncan.oracles import oracle as d66
 
         result = d66(Dice(seed=1))
         assert isinstance(result, str)
-        assert "d66 Oracle" in result
+        assert "Oracle" in result
 
-    def test_d66_includes_sections(self):
+    def test_oracle_includes_sections(self):
         from duncan.oracle import Dice
-        from duncan.oracles import d66
+        from duncan.oracles import oracle as d66
 
         result = d66(Dice(seed=42))
         assert "Action:" in result

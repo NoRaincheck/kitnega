@@ -2,6 +2,15 @@
 
 > agenti(k) backwards
 
+A monorepo with two stdlib-only tools for different domains:
+
+| Package | Role |
+| ------- | ---- |
+| `cody`  | Agentic coding harness — LLM-powered coding agent |
+| `duncan` | TTRPG procedural oracle — dice-driven random generation |
+
+## cody
+
 A minimal agentic coding harness using only Python stdlib.
 
 ```
@@ -16,7 +25,7 @@ while not done:
         done = true
 ```
 
-## Quick Start
+### Quick Start
 
 ```bash
 # Interactive REPL
@@ -31,50 +40,39 @@ echo "explain the codebase" | uv run cody
 # Continue last session
 uv run cody -c
 
+# List sessions
+uv run cody -s
+
 # Auto-approve (YOLO mode) — also enables parallel tool execution
 CODY_APPROVE=all uv run cody "run tests and fix failures"
 ```
 
-## Configuration
+### Configuration
 
 Set via environment variables:
 
 ```bash
 export CODY_API="http://localhost:1234/v1/responses"
-export CODY_MODEL="qwen3-coder-next"
+export CODY_MODEL="qwen3.6-35b-a3b"
 export CODY_API_KEY="your-key"  # optional
 export CODY_STREAM="1"          # enable SSE streaming for real-time output (default: 1)
-export CODY_MAX_STEPS="200"     # max tool call iterations (default: 200)
+export CODY_MAX_STEPS="20"      # max tool call iterations (default: 20)
 ```
 
-## Workspaces
-
-This repository uses
-[uv workspaces](https://docs.astral.sh/uv/concepts/projects/workspaces/). The
-main package is `cody` (`cody/`).
-
-```bash
-uv sync              # install all workspace members
-```
-
-## Features
+### Features
 
 - **Zero dependencies** — pure Python stdlib (urllib, subprocess, json)
-- **OpenAI-compatible** — works with LM Studio, Ollama, any Responses API
-  endpoint
+- **OpenAI-compatible** — works with LM Studio, Ollama, any Responses API endpoint
 - **SSE streaming** — real-time text output via server-sent events
-- **Parallel tool execution** — runs independent tools concurrently in
-  auto-approve mode
+- **Parallel tool execution** — runs independent tools concurrently in auto-approve mode
 - **.gitignore-aware** — respects project gitignore rules when searching files
-- **Cached context walks** — discovers AGENTS.md/README.md once per session, not
-  every turn
+- **Cached context walks** — discovers AGENTS.md/README.md once per session, not every turn
 - **In-memory session cache** — defers disk writes, avoids redundant I/O
 - **Pipe-able** — `echo "prompt" | cody` for scripting
-- **Human-in-the-loop** — approve each write/edit/bash call, read-only tools
-  skip approval
+- **Human-in-the-loop** — approve each write/edit/bash call, read-only tools skip approval
 - **Session persistence** — continue conversations with `-c` or pick with `-s`
 
-## Built-in Tools
+### Built-in Tools
 
 | Tool    | Approval    | Description                                 |
 | ------- | ----------- | ------------------------------------------- |
@@ -86,7 +84,7 @@ uv sync              # install all workspace members
 | `find`  | ❌ skip     | Find files by glob pattern                  |
 | `ls`    | ❌ skip     | List directory contents                     |
 
-## REPL Commands
+### REPL Commands
 
 | Command        | Description                 |
 | -------------- | --------------------------- |
@@ -95,9 +93,33 @@ uv sync              # install all workspace members
 | `:load`        | List recent sessions        |
 | `:load <id>`   | Continue a specific session |
 
+## duncan
+
+A TTRPG procedural oracle — generates NPCs, events, locations, factions, and
+encounters via seeded dice and weighted tables. No LLM, no API calls.
+
+See [duncan/README.md](duncan/README.md) for full docs.
+
+```bash
+uv run duncan npc
+uv run duncan event --seed tavern42
+uv run duncan "a shady merchant in a tavern"
+```
+
+## Workspace
+
+This repository uses
+[uv workspaces](https://docs.astral.sh/uv/concepts/projects/workspaces/).
+
+```bash
+uv sync              # install all workspace members
+uv run cody <cmd>    # run the coding agent
+uv run duncan <cmd>  # run the TTRPG oracle
+uv run pytest        # run tests
+uv run ruff check    # lint
+```
+
 ## Inspired By
 
-- [pnegahdar/nano](https://github.com/pnegahdar/nano) — minimalist agentic
-coding workflow ideas
-- [badlogic/pi-mono](https://github.com/badlogic/pi-mono) — terminal-focused
-agent harness design
+- [pnegahdar/nano](https://github.com/pnegahdar/nano) — minimalist agentic coding workflow ideas
+- [badlogic/pi-mono](https://github.com/badlogic/pi-mono) — terminal-focused agent harness design

@@ -3,24 +3,14 @@ requires = ["setuptools>=64"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "cody"
+name = "lib"
 version = "0.1.0"
-description = "Minimal Python coding agent using stdlib"
+description = "Shared utilities for kitnega workspace members"
 requires-python = ">=3.14"
-dependencies = ["lib"]
-
-[project.scripts]
-cody = "cody.__main__:main"
-
-[dependency-groups]
-dev = [
-    "pytest>=9.0.3",
-    "ruff>=0.15.13",
-    "ty>=0.0.37",
-]
+dependencies = []
 
 [tool.setuptools.packages.find]
-include = ["cody*"]
+include = ["lib*"]
 
 [tool.ruff]
 line-length = 120

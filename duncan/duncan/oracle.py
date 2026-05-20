@@ -3,13 +3,15 @@ import random
 
 
 class Dice:
-    def __init__(self, seed=None):
+    def __init__(self, seed=None, bias=None, filtered=False):
         if seed is not None:
             if isinstance(seed, str):
                 seed = int(hashlib.sha256(seed.encode()).hexdigest(), 16) % (1 << 32)
             self._rng = random.Random(seed)
         else:
             self._rng = random.Random()
+        self._bias = bias
+        self._filtered = filtered
 
     def roll(self, expr):
         expr = expr.lower().replace(" ", "")
@@ -50,8 +52,17 @@ class Dice:
         self._rng.shuffle(items)
         return items
 
-    def weighted(self, table):
+    def weighted(self, table, bias=None):
         items = list(table.items()) if isinstance(table, dict) else table
+        bias_fn = bias or self._bias
+        if bias_fn:
+            if self._filtered:
+                filtered_items = [(item, w) for item, w in items if bias_fn(item)]
+                if filtered_items:
+                    items = filtered_items
+            else:
+                total = sum(w for _, w in items)
+                items = [(item, w + total if bias_fn(item) else w) for item, w in items]
         total = sum(w for _, w in items)
         r = self._rng.random() * total
         for item, weight in items:

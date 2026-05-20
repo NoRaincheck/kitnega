@@ -2,14 +2,16 @@
 
 ## Project
 
-`uv`-managed Python workspace with one member package: `cody` (`cody/`). At its
-core it should only use Python stdlib.
+`uv`-managed Python workspace with two member packages: `cody` (`cody/`) and
+`duncan` (`duncan/`). At their core both should only use Python stdlib.
 
 ## Workflow
 
 - `uv sync` — install all workspace members
 - `uv run cody <command>` — run the coding agent
-- `uv run <tool>` — run tests, linting, scripts within the workspace
+- `uv run duncan <command>` — run the TTRPG oracle
+- `uv run pytest` — run tests
+- `uv run ruff check` — lint
 
 ## Change discipline
 
