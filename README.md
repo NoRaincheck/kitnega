@@ -2,12 +2,13 @@
 
 > agenti(k) backwards
 
-A monorepo with two stdlib-only tools for different domains:
+A monorepo with three stdlib-only tools for different domains:
 
 | Package | Role |
 | ------- | ---- |
 | `cody`  | Agentic coding harness — LLM-powered coding agent |
 | `duncan` | TTRPG procedural oracle — dice-driven random generation |
+| `carly` | Procedural map generator — diamond-square + Voronoi |
 
 ## cody
 
@@ -106,6 +107,22 @@ uv run duncan event --seed tavern42
 uv run duncan "a shady merchant in a tavern"
 ```
 
+## carly
+
+A procedural map generator using diamond-square heightmaps and Voronoi terrain
+regions. Pure Python stdlib, zero dependencies.
+
+```bash
+uv run carly                                    # default 32x24 map
+uv run carly --width 64 --height 48 --rivers    # larger map with rivers
+uv run carly --seed 8675309 --voronoi-regions 300
+uv run carly --enable-voronoi -o mymap.png      # Voronoi normalization
+```
+
+Sample output (32×24 tiles, rivers enabled):
+
+![Sample map](tests/sample-map.png)
+
 ## Workspace
 
 This repository uses
@@ -115,6 +132,7 @@ This repository uses
 uv sync              # install all workspace members
 uv run cody <cmd>    # run the coding agent
 uv run duncan <cmd>  # run the TTRPG oracle
+uv run carly <args>  # run the map generator
 uv run pytest        # run tests
 uv run ruff check    # lint
 ```
