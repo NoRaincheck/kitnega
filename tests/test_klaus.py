@@ -293,7 +293,7 @@ class _TestClient:
             "wsgi.version": (1, 0),
             "wsgi.url_scheme": "http",
             "wsgi.input": io.BytesIO(body or b""),
-            "wsgi.errors": io.BytesIO(),
+            "wsgi.errors": io.StringIO(),
             "wsgi.multithread": False,
             "wsgi.multiprocess": False,
             "wsgi.run_once": False,
