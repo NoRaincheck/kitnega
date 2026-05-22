@@ -1,5 +1,5 @@
 % rebase("layout")
-<div class="container" style="max-width: 400px; margin-top: 60px;">
+<div class="container" style="max-width: 400px; margin-top: 60px">
   <div class="card">
     <h1>Create an account</h1>
     % if defined("error") and error:
@@ -8,20 +8,42 @@
     <form action="/register" method="POST">
       <div class="form-group">
         <label for="username">Username</label>
-        <input type="text" id="username" name="username" required autofocus
-               pattern="[a-zA-Z0-9_]+" title="Letters, numbers, and underscores only">
+        <input
+          type="text"
+          id="username"
+          name="username"
+          required
+          autofocus
+          pattern="[a-zA-Z0-9_]+"
+          title="Letters, numbers, and underscores only"
+        >
       </div>
       <div class="form-group">
         <label for="display_name">Display Name</label>
-        <input type="text" id="display_name" name="display_name" placeholder="Optional">
+        <input
+          type="text"
+          id="display_name"
+          name="display_name"
+          placeholder="Optional"
+        >
       </div>
       <div class="form-group">
         <label for="password">Password</label>
-        <input type="password" id="password" name="password" required minlength="4">
+        <input
+          type="password"
+          id="password"
+          name="password"
+          required
+          minlength="4"
+        >
       </div>
-      <button type="submit" class="btn btn-primary" style="width:100%">Register</button>
+      <button type="submit" class="btn btn-primary" style="width: 100%">
+        Register
+      </button>
     </form>
-    <p style="margin-top: 12px; text-align: center; font-size: 13px; color: #6b7280;">
+    <p
+      style="margin-top: 12px; text-align: center; font-size: 13px; color: #6b7280"
+    >
       Already have an account? <a href="/login">Sign in</a>
     </p>
   </div>

@@ -15,6 +15,7 @@ def _get_or_create_secret(path):
         with open(path) as f:
             return f.read().strip()
     import secrets
+
     secret = secrets.token_hex(32)
     with open(path, "w") as f:
         f.write(secret)
@@ -60,8 +61,7 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument("--db", default=DEFAULT_DB, help=f"Database path (default: {DEFAULT_DB})")
-    parser.add_argument("--secret-file", default=DEFAULT_SECRET,
-                        help=f"Secret file path (default: {DEFAULT_SECRET})")
+    parser.add_argument("--secret-file", default=DEFAULT_SECRET, help=f"Secret file path (default: {DEFAULT_SECRET})")
 
     sub = parser.add_subparsers(dest="command")
     sub.required = True

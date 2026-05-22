@@ -188,9 +188,7 @@ def trace_downhill(
     return path
 
 
-def generate_rivers(
-    heights: list[list[float]], terrain: list[list[str]]
-) -> set[tuple[int, int]]:
+def generate_rivers(heights: list[list[float]], terrain: list[list[str]]) -> set[tuple[int, int]]:
     h, w = len(terrain), len(terrain[0])
     candidates: list[tuple[int, int]] = []
     for r in range(h):

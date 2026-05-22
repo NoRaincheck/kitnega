@@ -101,6 +101,7 @@ class TestNPCGeneration:
     def test_npc_uses_mythiria_names(self):
         from duncan.oracle import Dice
         from duncan.oracles import npc
+
         from duncan import tables_npc as TN
 
         result = npc(Dice(seed=1))
@@ -253,12 +254,11 @@ class TestRune:
     def test_rune_from_mythiria_types(self):
         from duncan.oracle import Dice
         from duncan.oracles import rune
+
         from duncan import tables_npc as TN
 
         result = rune(Dice(seed=1))
-        rune_line = [line for line in result.splitlines() if line.startswith("Rune:")][
-            0
-        ]
+        rune_line = [line for line in result.splitlines() if line.startswith("Rune:")][0]
         for rune_type in TN.RUNES:
             if rune_type in rune_line:
                 break

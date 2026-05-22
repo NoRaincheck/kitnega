@@ -3,8 +3,8 @@
 
 class TestForestClassifier:
     def test_fit_predict_binary(self):
-        from merlin.forest import ExtraForestClassifier
         from lib.array import array
+        from merlin.forest import ExtraForestClassifier
 
         X = array([[1.0, 2.0], [2.0, 3.0], [3.0, 4.0], [4.0, 5.0]])
         y = array([0.0, 0.0, 1.0, 1.0])
@@ -14,8 +14,8 @@ class TestForestClassifier:
         assert list(preds.flat) == [0.0, 0.0, 1.0, 1.0]
 
     def test_predict_proba_shape(self):
-        from merlin.forest import ExtraForestClassifier
         from lib.array import array
+        from merlin.forest import ExtraForestClassifier
 
         X = array([[1.0, 2.0], [2.0, 3.0], [3.0, 4.0]])
         y = array([0.0, 1.0, 2.0])
@@ -27,20 +27,19 @@ class TestForestClassifier:
             assert abs(sum(proba[i, j] for j in range(3)) - 1.0) < 1e-10
 
     def test_no_bootstrap(self):
-        from merlin.forest import ExtraForestClassifier
         from lib.array import array
+        from merlin.forest import ExtraForestClassifier
 
         X = array([[1.0, 2.0], [2.0, 3.0], [3.0, 4.0], [4.0, 5.0]])
         y = array([0.0, 0.0, 1.0, 1.0])
-        clf = ExtraForestClassifier(n_estimators=5, bootstrap=False,
-                                    max_depth=3, random_state=42)
+        clf = ExtraForestClassifier(n_estimators=5, bootstrap=False, max_depth=3, random_state=42)
         clf.fit(X, y)
         assert len(clf.trees_) == 5
         assert list(clf.predict(X).flat) == [0.0, 0.0, 1.0, 1.0]
 
     def test_single_class(self):
-        from merlin.forest import ExtraForestClassifier
         from lib.array import array
+        from merlin.forest import ExtraForestClassifier
 
         X = array([[1.0], [2.0], [3.0]])
         y = array([0.0, 0.0, 0.0])
@@ -52,8 +51,8 @@ class TestForestClassifier:
 
 class TestForestRegressor:
     def test_fit_predict(self):
-        from merlin.forest import ExtraForestRegressor
         from lib.array import array
+        from merlin.forest import ExtraForestRegressor
 
         X = array([[1.0], [2.0], [3.0], [4.0]])
         y = array([1.0, 2.0, 3.0, 4.0])
@@ -63,21 +62,20 @@ class TestForestRegressor:
         assert preds.shape[0] == 4
 
     def test_no_bootstrap(self):
-        from merlin.forest import ExtraForestRegressor
         from lib.array import array
+        from merlin.forest import ExtraForestRegressor
 
         X = array([[1.0], [2.0]])
         y = array([1.0, 2.0])
-        reg = ExtraForestRegressor(n_estimators=3, bootstrap=False,
-                                   max_depth=2, random_state=42)
+        reg = ExtraForestRegressor(n_estimators=3, bootstrap=False, max_depth=2, random_state=42)
         reg.fit(X, y)
         assert len(reg.trees_) == 3
 
 
 class TestIsolationForest:
     def test_fit_score(self):
-        from merlin.isoforest import IsolationForest
         from lib.array import array
+        from merlin.isoforest import IsolationForest
 
         X = array([[1.0, 1.0], [1.0, 2.0], [2.0, 1.0], [10.0, 10.0]])
         iso = IsolationForest(n_estimators=10, random_state=42)
@@ -86,8 +84,8 @@ class TestIsolationForest:
         assert scores.shape == (4,)
 
     def test_predict_shape(self):
-        from merlin.isoforest import IsolationForest
         from lib.array import array
+        from merlin.isoforest import IsolationForest
 
         X = array([[1.0, 1.0], [2.0, 2.0], [10.0, 10.0]])
         iso = IsolationForest(n_estimators=5, random_state=42)
@@ -96,8 +94,8 @@ class TestIsolationForest:
         assert preds.shape == (3,)
 
     def test_decision_function(self):
-        from merlin.isoforest import IsolationForest
         from lib.array import array
+        from merlin.isoforest import IsolationForest
 
         X = array([[1.0, 1.0], [2.0, 2.0]])
         iso = IsolationForest(n_estimators=5, random_state=42)
@@ -108,8 +106,8 @@ class TestIsolationForest:
 
 class TestMondrianClassifier:
     def test_fit_predict_binary(self):
-        from merlin.mondrian import MondrianForestClassifier
         from lib.array import array
+        from merlin.mondrian import MondrianForestClassifier
 
         X = array([[1.0, 2.0], [2.0, 3.0], [3.0, 4.0], [4.0, 5.0]])
         y = array([0.0, 0.0, 1.0, 1.0])
@@ -119,8 +117,8 @@ class TestMondrianClassifier:
         assert list(preds.flat) == [0.0, 0.0, 1.0, 1.0]
 
     def test_predict_proba_shape(self):
-        from merlin.mondrian import MondrianForestClassifier
         from lib.array import array
+        from merlin.mondrian import MondrianForestClassifier
 
         X = array([[1.0], [2.0], [3.0]])
         y = array([0.0, 1.0, 0.0])
@@ -130,8 +128,8 @@ class TestMondrianClassifier:
         assert proba.shape == (3, 2)
 
     def test_partial_fit(self):
-        from merlin.mondrian import MondrianForestClassifier
         from lib.array import array
+        from merlin.mondrian import MondrianForestClassifier
 
         X1 = array([[1.0, 2.0], [2.0, 3.0]])
         y1 = array([0.0, 0.0])
@@ -147,8 +145,8 @@ class TestMondrianClassifier:
 
 class TestMondrianRegressor:
     def test_fit_predict(self):
-        from merlin.mondrian import MondrianForestRegressor
         from lib.array import array
+        from merlin.mondrian import MondrianForestRegressor
 
         X = array([[1.0], [2.0], [3.0], [4.0]])
         y = array([1.0, 2.0, 3.0, 4.0])
@@ -158,8 +156,8 @@ class TestMondrianRegressor:
         assert preds.shape[0] == 4
 
     def test_partial_fit(self):
-        from merlin.mondrian import MondrianForestRegressor
         from lib.array import array
+        from merlin.mondrian import MondrianForestRegressor
 
         reg = MondrianForestRegressor(n_estimators=3, random_state=42)
         reg.partial_fit(array([[1.0], [2.0]]), array([1.0, 2.0]))
@@ -170,10 +168,10 @@ class TestMondrianRegressor:
 
 class TestConvert:
     def test_extra_classifier_to_mondrian(self):
+        from lib.array import array
+        from merlin.convert import extra_to_mondrian
         from merlin.forest import ExtraForestClassifier
         from merlin.mondrian import MondrianForestClassifier
-        from merlin.convert import extra_to_mondrian
-        from lib.array import array
 
         X = array([[1.0, 2.0], [2.0, 3.0], [3.0, 4.0], [4.0, 5.0], [5.0, 6.0]])
         y = array([0.0, 0.0, 0.0, 1.0, 1.0])
@@ -186,10 +184,10 @@ class TestConvert:
         assert preds.shape == (5,)
 
     def test_extra_regressor_to_mondrian(self):
+        from lib.array import array
+        from merlin.convert import extra_to_mondrian
         from merlin.forest import ExtraForestRegressor
         from merlin.mondrian import MondrianForestRegressor
-        from merlin.convert import extra_to_mondrian
-        from lib.array import array
 
         X = array([[1.0], [2.0], [3.0], [4.0], [5.0]])
         y = array([1.0, 2.0, 3.0, 4.0, 5.0])
@@ -202,10 +200,10 @@ class TestConvert:
         assert preds.shape == (5,)
 
     def test_mondrian_classifier_to_extra(self):
-        from merlin.mondrian import MondrianForestClassifier
-        from merlin.forest import ExtraForestClassifier
-        from merlin.convert import mondrian_to_extra
         from lib.array import array
+        from merlin.convert import mondrian_to_extra
+        from merlin.forest import ExtraForestClassifier
+        from merlin.mondrian import MondrianForestClassifier
 
         X = array([[1.0, 2.0], [2.0, 3.0], [3.0, 4.0], [4.0, 5.0]])
         y = array([0.0, 0.0, 1.0, 1.0])
@@ -218,10 +216,10 @@ class TestConvert:
         assert preds.shape == (4,)
 
     def test_mondrian_regressor_to_extra(self):
-        from merlin.mondrian import MondrianForestRegressor
-        from merlin.forest import ExtraForestRegressor
-        from merlin.convert import mondrian_to_extra
         from lib.array import array
+        from merlin.convert import mondrian_to_extra
+        from merlin.forest import ExtraForestRegressor
+        from merlin.mondrian import MondrianForestRegressor
 
         X = array([[1.0], [2.0], [3.0], [4.0]])
         y = array([1.0, 2.0, 3.0, 4.0])
@@ -234,10 +232,10 @@ class TestConvert:
         assert preds.shape == (4,)
 
     def test_extra_classifier_to_iso(self):
+        from lib.array import array
+        from merlin.convert import extra_to_iso
         from merlin.forest import ExtraForestClassifier
         from merlin.isoforest import IsolationForest
-        from merlin.convert import extra_to_iso
-        from lib.array import array
 
         X = array([[1.0, 2.0], [2.0, 3.0], [3.0, 4.0], [4.0, 5.0], [10.0, 10.0]])
         y = array([0.0, 0.0, 0.0, 1.0, 1.0])
@@ -252,9 +250,9 @@ class TestConvert:
         assert scores.shape == (5,)
 
     def test_convert_roundtrip_classifier(self):
-        from merlin.forest import ExtraForestClassifier
-        from merlin.convert import extra_to_mondrian, mondrian_to_extra
         from lib.array import array
+        from merlin.convert import extra_to_mondrian, mondrian_to_extra
+        from merlin.forest import ExtraForestClassifier
 
         X = array([[1.0, 2.0], [2.0, 3.0], [3.0, 4.0], [4.0, 5.0]])
         y = array([0.0, 0.0, 1.0, 1.0])
@@ -268,7 +266,7 @@ class TestConvert:
         assert preds.shape == (4,)
 
     def test_convert_errors(self):
-        from merlin.convert import extra_to_mondrian, mondrian_to_extra, extra_to_iso
+        from merlin.convert import extra_to_iso, extra_to_mondrian, mondrian_to_extra
 
         try:
             extra_to_mondrian(object())

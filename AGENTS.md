@@ -5,7 +5,8 @@
 `uv`-managed Python workspace with two member packages: `cody` (`cody/`) and
 `duncan` (`duncan/`). At their core both should only use Python stdlib.
 
-`lib` contains single file modules that maybe vendored. Avoid modifying where possible.
+`lib` contains single file modules that maybe vendored. Avoid modifying where
+possible.
 
 ## Workflow
 
@@ -29,7 +30,8 @@ code while working on a task — that can wait.
 - Add comments only when intent isn't clear from the code
 - Cache filesystem walks and external reads per-process where possible
 - Use `.gitignore` awareness in file-search tools (grep, find)
-- Use sqlite3 for a database if required. Remember that sqlite3 supports full text search (bm25)
+- Use sqlite3 for a database if required. Remember that sqlite3 supports full
+  text search (bm25)
 
 ## Testing
 
@@ -38,25 +40,25 @@ Focused tests for core behavior and edge cases. Run via `uv run`. Tests live in
 
 ## Configuration
 
-All config is generated from `~/.kitnega/` — the directory is created on
-first use by each tool. Files:
+All config is generated from `~/.kitnega/` — the directory is created on first
+use by each tool. Files:
 
-| Path | Tool | Purpose |
-|------|------|---------|
-| `~/.kitnega/sessions.json` | Cody | Session persistence |
-| `~/.kitnega/klaus.db` | Klaus | SQLite chat database |
-| `~/.kitnega/klaus_secret` | Klaus | HMAC signing secret |
+| Path                       | Tool  | Purpose              |
+| -------------------------- | ----- | -------------------- |
+| `~/.kitnega/sessions.json` | Cody  | Session persistence  |
+| `~/.kitnega/klaus.db`      | Klaus | SQLite chat database |
+| `~/.kitnega/klaus_secret`  | Klaus | HMAC signing secret  |
 
 Environment variables use the `KN_` prefix:
 
-| Variable | Default | Tool | Purpose |
-|----------|---------|------|---------|
-| `KN_API` | `http://localhost:1234/v1/responses` | Cody/lib | LLM API endpoint |
-| `KN_MODEL` | `qwen3.6-35b-a3b` | Cody/lib | Model name |
-| `KN_API_KEY` | *(empty)* | Cody/lib | API key for LLM |
-| `KN_STREAM` | `1` | Cody | SSE streaming toggle |
-| `KN_MAX_STEPS` | `20` | Cody | Max tool call iterations |
-| `KN_APPROVE` | `all` | Cody | Auto-approve mode |
+| Variable       | Default                              | Tool     | Purpose                  |
+| -------------- | ------------------------------------ | -------- | ------------------------ |
+| `KN_API`       | `http://localhost:1234/v1/responses` | Cody/lib | LLM API endpoint         |
+| `KN_MODEL`     | `qwen3.6-35b-a3b`                    | Cody/lib | Model name               |
+| `KN_API_KEY`   | _(empty)_                            | Cody/lib | API key for LLM          |
+| `KN_STREAM`    | `1`                                  | Cody     | SSE streaming toggle     |
+| `KN_MAX_STEPS` | `20`                                 | Cody     | Max tool call iterations |
+| `KN_APPROVE`   | `all`                                | Cody     | Auto-approve mode        |
 
 ## Documentation
 

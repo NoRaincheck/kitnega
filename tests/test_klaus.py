@@ -20,9 +20,7 @@ class TestDB:
 
         db.init_db(db_path)
         conn = db._get_db()
-        tables = conn.execute(
-            "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name"
-        ).fetchall()
+        tables = conn.execute("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name").fetchall()
         names = {r[0] for r in tables}
         assert "users" in names
         assert "rooms" in names
@@ -300,7 +298,9 @@ class _TestClient:
             "wsgi.multiprocess": False,
             "wsgi.run_once": False,
             "CONTENT_LENGTH": str(len(body or b"")),
-            "CONTENT_TYPE": headers.get("Content-Type", "application/x-www-form-urlencoded") if headers else "application/x-www-form-urlencoded",
+            "CONTENT_TYPE": headers.get("Content-Type", "application/x-www-form-urlencoded")
+            if headers
+            else "application/x-www-form-urlencoded",
         }
         if headers:
             for k, v in headers.items():
@@ -326,9 +326,7 @@ class _TestClient:
             headers = dict(resp_headers)
             body = raw
             text = raw.decode("utf-8", errors="replace")
-            set_cookie = resp_headers[-1][1] if any(
-                k.lower() == "set-cookie" for k, _ in resp_headers
-            ) else None
+            set_cookie = resp_headers[-1][1] if any(k.lower() == "set-cookie" for k, _ in resp_headers) else None
 
             @property
             def cookie_dict(self):
@@ -392,7 +390,9 @@ class TestApp:
         cookie = resp.cookie_dict
 
         form2 = "name=test-room&topic=testing&is_public=1"
-        resp2 = client._call("POST", "/rooms", headers={"Cookie": f"user_id={cookie.get('user_id', '')}"}, body=form2.encode())
+        resp2 = client._call(
+            "POST", "/rooms", headers={"Cookie": f"user_id={cookie.get('user_id', '')}"}, body=form2.encode()
+        )
         assert resp2.status_code in (302, 303)
 
     def test_send_message_to_room(self, client):
@@ -405,7 +405,8 @@ class TestApp:
 
         msg_form = "content=hello+world"
         msg_resp = client._call(
-            "POST", "/rooms/1/messages",
+            "POST",
+            "/rooms/1/messages",
             headers={"Cookie": f"user_id={cookie.get('user_id', '')}"},
             body=msg_form.encode(),
         )
@@ -418,7 +419,8 @@ class TestApp:
         cookie = resp.cookie_dict
 
         resp2 = client._call(
-            "GET", "/rooms/1/messages",
+            "GET",
+            "/rooms/1/messages",
             headers={"Cookie": f"user_id={cookie.get('user_id', '')}"},
         )
         assert resp2.status_code == 200
@@ -441,7 +443,8 @@ class TestApp:
         resp = client._call("POST", "/register", body="username=bob&password=p&display_name=Bob".encode())
 
         dm_resp = client._call(
-            "POST", "/dm/bob",
+            "POST",
+            "/dm/bob",
             headers={"Cookie": f"user_id={alice_cookie.get('user_id', '')}"},
         )
         assert dm_resp.status_code == 200

@@ -1,10 +1,14 @@
-% for u in users:
-% if u["id"] != current_user["id"]:
-<div style="padding:4px 0">
-  <a href="#" hx-post="/dm/{{u['username']}}" hx-target="body" hx-swap="innerHTML"
-     style="font-size:14px">
-    @{{u["username"]}} {{"- " + u["display_name"] if u["display_name"] and u["display_name"] != u["username"] else ""}}
+% for u in users: % if u["id"] != current_user["id"]:
+<div style="padding: 4px 0">
+  <a
+    href="#"
+    hx-post="/dm/{{u['username']}}"
+    hx-target="body"
+    hx-swap="innerHTML"
+    style="font-size: 14px"
+  >
+    @{{u["username"]}} {{"- " + u["display_name"] if u["display_name"] and
+    u["display_name"] != u["username"] else ""}}
   </a>
 </div>
-% end
-% end
+% end % end

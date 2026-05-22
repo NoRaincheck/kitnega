@@ -75,8 +75,15 @@ def _is_homogeneous(X):
 
 
 class _Tree:
-    def __init__(self, split="best", task="classifier", max_depth=None,
-                 max_features=None, lifetime=float("inf"), random_state=None):
+    def __init__(
+        self,
+        split="best",
+        task="classifier",
+        max_depth=None,
+        max_features=None,
+        lifetime=float("inf"),
+        random_state=None,
+    ):
         self.split = split
         self.task = task
         self.max_depth = max_depth
@@ -356,9 +363,7 @@ class _Tree:
             node.update_bounds(X)
 
         extension = [
-            max(old_lower[j] - node.lower_bounds[j], 0) +
-            max(node.upper_bounds[j] - old_upper[j], 0)
-            for j in range(nf)
+            max(old_lower[j] - node.lower_bounds[j], 0) + max(node.upper_bounds[j] - old_upper[j], 0) for j in range(nf)
         ]
         total_extension = sum(extension)
 
@@ -413,10 +418,19 @@ class _Tree:
 
 
 class RandomForest:
-    def __init__(self, n_estimators=100, task="classifier", split="best",
-                 max_depth=None, max_features=None, bootstrap=True,
-                 lifetime=float("inf"), max_samples=None,
-                 contamination="auto", random_state=None):
+    def __init__(
+        self,
+        n_estimators=100,
+        task="classifier",
+        split="best",
+        max_depth=None,
+        max_features=None,
+        bootstrap=True,
+        lifetime=float("inf"),
+        max_samples=None,
+        contamination="auto",
+        random_state=None,
+    ):
         self.n_estimators = n_estimators
         self.task = task
         self.split = split
@@ -615,8 +629,7 @@ class RandomForest:
 
 
 class ExtraForestClassifier(RandomForest):
-    def __init__(self, n_estimators=100, max_depth=None, max_features=None,
-                 bootstrap=True, random_state=None):
+    def __init__(self, n_estimators=100, max_depth=None, max_features=None, bootstrap=True, random_state=None):
         super().__init__(
             n_estimators=n_estimators,
             task="classifier",
@@ -629,8 +642,7 @@ class ExtraForestClassifier(RandomForest):
 
 
 class ExtraForestRegressor(RandomForest):
-    def __init__(self, n_estimators=100, max_depth=None, max_features=None,
-                 bootstrap=True, random_state=None):
+    def __init__(self, n_estimators=100, max_depth=None, max_features=None, bootstrap=True, random_state=None):
         super().__init__(
             n_estimators=n_estimators,
             task="regressor",
@@ -643,8 +655,7 @@ class ExtraForestRegressor(RandomForest):
 
 
 class IsolationForest(RandomForest):
-    def __init__(self, n_estimators=100, max_samples="auto",
-                 contamination="auto", random_state=None):
+    def __init__(self, n_estimators=100, max_samples="auto", contamination="auto", random_state=None):
         super().__init__(
             n_estimators=n_estimators,
             task="anomaly",

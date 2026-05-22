@@ -158,7 +158,8 @@ def list_users():
 
 def get_rooms(user_id):
     conn = _get_db()
-    rows = conn.execute("""
+    rows = conn.execute(
+        """
         SELECT r.id, r.name, r.topic, r.is_public,
                (SELECT COUNT(*) FROM messages m WHERE m.room_id = r.id AND (rm.last_read_at IS NULL OR m.created_at > rm.last_read_at)) AS unread_count,
                (SELECT MAX(m.created_at) FROM messages m WHERE m.room_id = r.id) AS last_message_at,
@@ -166,10 +167,22 @@ def get_rooms(user_id):
         FROM rooms r
         LEFT JOIN room_members rm ON rm.room_id = r.id AND rm.user_id = ?
         ORDER BY r.is_public DESC, last_message_at DESC
-    """, (user_id,)).fetchall()
+    """,
+        (user_id,),
+    ).fetchall()
     conn.close()
-    return [{"id": r[0], "name": r[1], "topic": r[2], "is_public": r[3],
-             "unread_count": r[4], "last_message_at": r[5], "is_member": r[6]} for r in rows]
+    return [
+        {
+            "id": r[0],
+            "name": r[1],
+            "topic": r[2],
+            "is_public": r[3],
+            "unread_count": r[4],
+            "last_message_at": r[5],
+            "is_member": r[6],
+        }
+        for r in rows
+    ]
 
 
 def get_room(room_id):
@@ -207,8 +220,10 @@ def get_dm_room(user_id, other_id):
         return row[0]
     cur = conn.execute("INSERT INTO rooms (name, topic, is_public) VALUES (?, '', 0)", (name,))
     room_id = cur.lastrowid
-    conn.execute("INSERT OR IGNORE INTO room_members (room_id, user_id) VALUES (?, ?), (?, ?)",
-                 (room_id, user_id, room_id, other_id))
+    conn.execute(
+        "INSERT OR IGNORE INTO room_members (room_id, user_id) VALUES (?, ?), (?, ?)",
+        (room_id, user_id, room_id, other_id),
+    )
     conn.commit()
     conn.close()
     return room_id
@@ -261,17 +276,22 @@ def get_messages(room_id, user_id, limit=50):
         if not is_public or not is_public[0]:
             conn.close()
             return None
-    rows = conn.execute("""
+    rows = conn.execute(
+        """
         SELECT m.id, m.content, m.created_at, u.id, u.username, u.display_name
         FROM messages m
         JOIN users u ON u.id = m.user_id
         WHERE m.room_id = ?
         ORDER BY m.created_at ASC
         LIMIT ?
-    """, (room_id, limit)).fetchall()
+    """,
+        (room_id, limit),
+    ).fetchall()
     conn.close()
-    return [{"id": r[0], "content": r[1], "created_at": r[2],
-             "user_id": r[3], "username": r[4], "display_name": r[5]} for r in rows]
+    return [
+        {"id": r[0], "content": r[1], "created_at": r[2], "user_id": r[3], "username": r[4], "display_name": r[5]}
+        for r in rows
+    ]
 
 
 def send_message(room_id, user_id, content):
@@ -294,21 +314,31 @@ def send_message(room_id, user_id, content):
         "INSERT INTO messages_fts (rowid, content) VALUES (?, ?)",
         (msg_id, content),
     )
-    row = conn.execute("""
+    row = conn.execute(
+        """
         SELECT m.id, m.content, m.created_at, u.id, u.username, u.display_name
         FROM messages m
         JOIN users u ON u.id = m.user_id
         WHERE m.id = ?
-    """, (msg_id,)).fetchone()
+    """,
+        (msg_id,),
+    ).fetchone()
     conn.commit()
     conn.close()
-    return {"id": row[0], "content": row[1], "created_at": row[2],
-            "user_id": row[3], "username": row[4], "display_name": row[5]}
+    return {
+        "id": row[0],
+        "content": row[1],
+        "created_at": row[2],
+        "user_id": row[3],
+        "username": row[4],
+        "display_name": row[5],
+    }
 
 
 def search_messages(query, user_id, limit=20):
     conn = _get_db()
-    rows = conn.execute("""
+    rows = conn.execute(
+        """
         SELECT m.id, m.content, m.created_at, m.room_id, r.name,
                u.id, u.username, u.display_name
         FROM messages_fts f
@@ -319,22 +349,37 @@ def search_messages(query, user_id, limit=20):
         WHERE messages_fts MATCH ?
         ORDER BY m.created_at DESC
         LIMIT ?
-    """, (user_id, query, limit)).fetchall()
+    """,
+        (user_id, query, limit),
+    ).fetchall()
     conn.close()
-    return [{"id": r[0], "content": r[1], "created_at": r[2], "room_id": r[3],
-             "room_name": r[4], "user_id": r[5], "username": r[6], "display_name": r[7]}
-            for r in rows]
+    return [
+        {
+            "id": r[0],
+            "content": r[1],
+            "created_at": r[2],
+            "room_id": r[3],
+            "room_name": r[4],
+            "user_id": r[5],
+            "username": r[6],
+            "display_name": r[7],
+        }
+        for r in rows
+    ]
 
 
 def get_recent_rooms(user_id):
     conn = _get_db()
-    rows = conn.execute("""
+    rows = conn.execute(
+        """
         SELECT DISTINCT r.id, r.name, r.is_public
         FROM messages m
         JOIN rooms r ON r.id = m.room_id
         WHERE m.user_id = ?
         ORDER BY m.created_at DESC
         LIMIT 5
-    """, (user_id,)).fetchall()
+    """,
+        (user_id,),
+    ).fetchall()
     conn.close()
     return [{"id": r[0], "name": r[1], "is_public": r[2]} for r in rows]

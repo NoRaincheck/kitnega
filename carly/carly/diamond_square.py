@@ -180,9 +180,7 @@ def voronoi_normalize(
     rng = random.Random(seed)
 
     inner_count = max(1, num_regions)
-    inner_points: list[tuple[float, float]] = [
-        (rng.random() * h, rng.random() * w) for _ in range(inner_count)
-    ]
+    inner_points: list[tuple[float, float]] = [(rng.random() * h, rng.random() * w) for _ in range(inner_count)]
     border_points = _border_seed_points(w, h, num_regions)
     all_points = inner_points + border_points
     num_points = len(all_points)

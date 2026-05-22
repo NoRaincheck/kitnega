@@ -312,7 +312,7 @@ class TestArithmetic:
         from lib.array import array
 
         a = array([2, 3])
-        b = a ** 3
+        b = a**3
         assert list(b.flat) == [8, 27]
 
     def test_shape_mismatch(self):
@@ -426,7 +426,7 @@ class TestMethods:
         try:
             a.reshape((2, 2))
             assert False, "expected ValueError"
-        except (ValueError, AttributeError):
+        except ValueError, AttributeError:
             pass
 
     def test_transpose_2d(self):

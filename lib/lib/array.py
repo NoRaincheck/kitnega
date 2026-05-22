@@ -347,13 +347,13 @@ class ndarray:
     def __pow__(self, other):
         if isinstance(other, (int, float)):
             out = empty(self.shape, self.dtype)
-            out[:] = [x ** other for x in self._data]
+            out[:] = [x**other for x in self._data]
             return out
         if isinstance(other, ndarray):
             if self.shape != other.shape:
                 raise ValueError(f"shape mismatch: {self.shape} vs {other.shape}")
             out = empty(self.shape, self.dtype)
-            out[:] = [i ** j for (i, j) in zip(self.flat, other.flat)]
+            out[:] = [i**j for (i, j) in zip(self.flat, other.flat)]
             return out
         return NotImplemented
 
@@ -382,7 +382,7 @@ class ndarray:
         return self
 
     def __ipow__(self, other):
-        self[:] = self ** other
+        self[:] = self**other
         return self
 
     def _index_helper(self, key):
@@ -528,7 +528,7 @@ class ndarray:
         out = self.view()
         try:
             out.shape = newshape
-        except (AttributeError, ValueError):
+        except AttributeError, ValueError:
             out = self.copy()
             out.shape = newshape
         return out
@@ -664,7 +664,7 @@ def array(object, dtype=None, copy=True):
         try:
             float(object[0])
             dtype = "float64"
-        except (TypeError, IndexError):
+        except TypeError, IndexError:
             dtype = "float64"
     shape = []
     obj = object

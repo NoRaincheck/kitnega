@@ -7,9 +7,7 @@ class TestTreeShap:
 
         X = [[0.1, 0.2], [0.3, 0.4], [0.5, 0.6], [0.7, 0.8]]
         y = [1.0, 2.0, 3.0, 4.0]
-        rf = RandomForest(
-            task="regressor", n_estimators=5, max_depth=3, random_state=42
-        )
+        rf = RandomForest(task="regressor", n_estimators=5, max_depth=3, random_state=42)
         rf.fit(X, y)
         shap, bias = rf.shap_values(X)
         preds = rf.predict(X)
@@ -22,9 +20,7 @@ class TestTreeShap:
 
         X = [[0.1, 0.2], [0.3, 0.4], [0.5, 0.6], [0.7, 0.8]]
         y = [1.0, 2.0, 3.0, 4.0]
-        rf = RandomForest(
-            task="regressor", n_estimators=5, max_depth=3, random_state=42
-        )
+        rf = RandomForest(task="regressor", n_estimators=5, max_depth=3, random_state=42)
         rf.fit(X, y)
         preds1 = rf.predict(X)
         preds2, shap, bias = rf.predict(X, output_shap=True)
@@ -36,9 +32,7 @@ class TestTreeShap:
 
         X = [[0.1, 0.2], [0.3, 0.4], [0.5, 0.6], [0.7, 0.8], [0.9, 1.0]]
         y = [0, 0, 1, 1, 1]
-        rf = RandomForest(
-            task="classifier", n_estimators=5, max_depth=3, random_state=42
-        )
+        rf = RandomForest(task="classifier", n_estimators=5, max_depth=3, random_state=42)
         rf.fit(X, y)
         shap, bias = rf.shap_values(X)
         probs = rf.predict_proba(X)
@@ -52,9 +46,7 @@ class TestTreeShap:
 
         X = [[0.1, 0.2], [0.3, 0.4], [0.5, 0.6], [0.7, 0.8], [0.9, 1.0]]
         y = [0, 0, 1, 1, 1]
-        rf = RandomForest(
-            task="classifier", n_estimators=5, max_depth=3, random_state=42
-        )
+        rf = RandomForest(task="classifier", n_estimators=5, max_depth=3, random_state=42)
         rf.fit(X, y)
         probs1 = rf.predict_proba(X)
         probs2, shap, bias = rf.predict_proba(X, output_shap=True)
@@ -67,9 +59,7 @@ class TestTreeShap:
 
         X = [[0.1, 0.2], [0.3, 0.4], [0.5, 0.6], [0.7, 0.8], [0.9, 1.0]]
         y = [0, 0, 1, 1, 1]
-        rf = RandomForest(
-            task="classifier", n_estimators=5, max_depth=3, random_state=42
-        )
+        rf = RandomForest(task="classifier", n_estimators=5, max_depth=3, random_state=42)
         rf.fit(X, y)
         preds1 = rf.predict(X)
         preds2, shap, bias = rf.predict(X, output_shap=True)
@@ -87,9 +77,7 @@ class TestTreeShap:
             [0.9, 1.0, 0.1],
         ]
         y = [0, 1, 2, 0, 1]
-        rf = RandomForest(
-            task="classifier", n_estimators=5, max_depth=3, random_state=42
-        )
+        rf = RandomForest(task="classifier", n_estimators=5, max_depth=3, random_state=42)
         rf.fit(X, y)
         shap, bias = rf.shap_values(X)
         probs = rf.predict_proba(X)
@@ -104,9 +92,7 @@ class TestTreeShap:
 
         X = [[0.1, 0.2], [0.3, 0.4]]
         y = [1.0, 2.0]
-        rf = RandomForest(
-            task="regressor", n_estimators=1, max_depth=3, random_state=42
-        )
+        rf = RandomForest(task="regressor", n_estimators=1, max_depth=3, random_state=42)
         rf.fit(X, y)
         shap, bias = rf.shap_values(X)
         preds = rf.predict(X)
@@ -119,9 +105,7 @@ class TestTreeShap:
 
         X = [[0.1, 0.2], [0.3, 0.4], [0.5, 0.6]]
         y = [1.0, 2.0, 3.0]
-        rf = RandomForest(
-            task="regressor", n_estimators=5, max_depth=3, random_state=42
-        )
+        rf = RandomForest(task="regressor", n_estimators=5, max_depth=3, random_state=42)
         rf.fit(X, y)
         shap, bias = rf.shap_values([X[0]])
         assert len(shap) == 1
@@ -134,9 +118,7 @@ class TestTreeShap:
 
         X = [[0.1], [0.3], [0.5], [0.7], [0.9]]
         y = [1.0, 2.0, 3.0, 4.0, 5.0]
-        rf = RandomForest(
-            task="regressor", n_estimators=5, max_depth=3, random_state=42
-        )
+        rf = RandomForest(task="regressor", n_estimators=5, max_depth=3, random_state=42)
         rf.fit(X, y)
         shap, bias = rf.shap_values(X)
         preds = rf.predict(X)
@@ -144,8 +126,9 @@ class TestTreeShap:
             assert abs(sum(shap[i]) + bias - preds[i]) < 1e-10
 
     def test_shap_bruteforce_agreement(self):
-        from merlin._shap import _shap_bruteforce, _tree_shap
         import random
+
+        from merlin._shap import _shap_bruteforce, _tree_shap
 
         rng = random.Random(42)
         for M in range(1, 5):
@@ -195,9 +178,7 @@ class TestTreeShap:
 
         X = [[0.1, 0.2, 0.3], [0.3, 0.4, 0.5], [0.5, 0.6, 0.7]]
         y = [1.0, 2.0, 3.0]
-        rf = RandomForest(
-            task="regressor", n_estimators=5, max_depth=3, random_state=42
-        )
+        rf = RandomForest(task="regressor", n_estimators=5, max_depth=3, random_state=42)
         rf.fit(X, y)
         shap, bias = rf.shap_values(X)
         assert len(shap) == 3
@@ -209,9 +190,7 @@ class TestTreeShap:
 
         X = [[0.1, 0.2], [0.3, 0.4], [0.5, 0.6], [0.7, 0.8], [0.9, 1.0]]
         y = [0, 0, 1, 1, 1]
-        rf = RandomForest(
-            task="classifier", n_estimators=5, max_depth=3, random_state=42
-        )
+        rf = RandomForest(task="classifier", n_estimators=5, max_depth=3, random_state=42)
         rf.fit(X, y)
         shap, bias = rf.shap_values(X)
         assert len(shap) == 5

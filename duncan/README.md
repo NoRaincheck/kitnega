@@ -1,7 +1,7 @@
 # Duncan — TTRPG Procedural Oracle
 
 A minimal Python agent that acts as a dungeon master oracle for tabletop RPGs.
-Duncan does not tell stories or run campaigns — it *generates content*: NPCs,
+Duncan does not tell stories or run campaigns — it _generates content_: NPCs,
 events, locations, factions, and encounters via procedural (code-based) weighted
 tables and seeded randomness.
 
@@ -10,9 +10,9 @@ This makes it **FAIR**: transparent, reproducible, and free of LLM bias.
 ## Design
 
 Duncan shares the same stdlib-only, modular philosophy as `cody` but replaces
-LLM orchestration with pure procedural generation. Every oracle uses a
-seeded `Dice` engine and weighted lookup tables — no API calls, no prompts,
-no hidden bias.
+LLM orchestration with pure procedural generation. Every oracle uses a seeded
+`Dice` engine and weighted lookup tables — no API calls, no prompts, no hidden
+bias.
 
 ```
 duncan npc                           # random NPC
@@ -39,14 +39,14 @@ packages/duncan/
 
 ## Oracles
 
-| Command       | Generates                          |
-|---------------|------------------------------------|
-| `duncan npc`  | Name, species, appearance, traits, profession, goal, secret |
-| `duncan event` | Type, trigger, participants, complication, atmosphere |
-| `duncan location` | Name, type, atmosphere, features, points of interest, hazards |
-| `duncan faction` | Name, type, goal, reputation, resources, internal conflict |
-| `duncan encounter` | Creatures, behaviour, situation, treasure |
-| `duncan oracle`  | Free-form action / theme / adjective via seeded dice |
+| Command            | Generates                                                     |
+| ------------------ | ------------------------------------------------------------- |
+| `duncan npc`       | Name, species, appearance, traits, profession, goal, secret   |
+| `duncan event`     | Type, trigger, participants, complication, atmosphere         |
+| `duncan location`  | Name, type, atmosphere, features, points of interest, hazards |
+| `duncan faction`   | Name, type, goal, reputation, resources, internal conflict    |
+| `duncan encounter` | Creatures, behaviour, situation, treasure                     |
+| `duncan oracle`    | Free-form action / theme / adjective via seeded dice          |
 
 ## Saved results (`.oracle`) files
 
@@ -59,8 +59,6 @@ cat session-01.oracle    # view saved result
 echo "---"                 # append notes between rolls  
 duncan event >> session-01.oracle
 ```
-
-
 
 ## Seeded randomness
 
@@ -75,8 +73,8 @@ Without `--seed`, each run picks a fresh random seed.
 
 ## Intent detection
 
-When no subcommand is given, Duncan scans the description for keywords to
-infer the oracle type automatically:
+When no subcommand is given, Duncan scans the description for keywords to infer
+the oracle type automatically:
 
 ```
 duncan "a shady merchant in a tavern"   → npc  (merchant, tavern)
@@ -98,13 +96,13 @@ The oracle engine supports standard RPG dice notation:
 
 `tokens` are the positional arguments passed to Duncan. They come in two forms:
 
-- **Explicit oracle type + description**: `duncan npc "a grizzled guard"`
-  first word matches an oracle name (npc, event, location etc),
-  rest is textual context fed to the generator
+- **Explicit oracle type + description**: `duncan npc "a grizzled guard"` first
+  word matches an oracle name (npc, event, location etc), rest is textual
+  context fed to the generator
 - **Free-form text** (no subcommand): `duncan "a shady merchant in the tavern"`
-  tokens become full input; intent detection scans them for keywords
-  and picks the most likely oracle type automatically
-  Tokens can also be empty which means Duncan prints help
+  tokens become full input; intent detection scans them for keywords and picks
+  the most likely oracle type automatically Tokens can also be empty which means
+  Duncan prints help
 
 ```bash
 duncan npc                       # tokens = ["npc"], desc = ""

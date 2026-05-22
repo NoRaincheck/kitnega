@@ -15,7 +15,7 @@ def _chunk(out, chunk_type: bytes, data: bytes) -> None:
     out.write(struct.pack(">I", _crc32(chunk_type, data) & 0xFFFFFFFF))
 
 
-_HEADER = b"\x89PNG\r\n\x1A\n"
+_HEADER = b"\x89PNG\r\n\x1a\n"
 
 
 def dump_png(out, pixels: list[list[tuple[int, int, int]]]) -> None:

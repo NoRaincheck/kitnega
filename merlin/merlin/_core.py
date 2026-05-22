@@ -3,9 +3,18 @@ from lib.array import ndarray
 
 class _Node:
     __slots__ = (
-        "feature", "threshold", "left", "right", "is_leaf",
-        "prediction", "size", "depth",
-        "tau", "delta", "lower_bounds", "upper_bounds",
+        "feature",
+        "threshold",
+        "left",
+        "right",
+        "is_leaf",
+        "prediction",
+        "size",
+        "depth",
+        "tau",
+        "delta",
+        "lower_bounds",
+        "upper_bounds",
     )
 
     def __init__(self, tau=0.0):

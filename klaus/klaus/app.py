@@ -35,7 +35,10 @@ def _enrich_room(room, user_id):
 def _render_content(content):
     def _mention_link(m):
         username = m.group(1)
-        return f'<a href="#" hx-post="/dm/{username}" hx-target="body" hx-swap="innerHTML" class="mention">@{username}</a>'
+        return (
+            f'<a href="#" hx-post="/dm/{username}" hx-target="body" hx-swap="innerHTML" class="mention">@{username}</a>'
+        )
+
     return re.sub(r"@(\w+)", _mention_link, content)
 
 
@@ -88,8 +91,15 @@ def index():
             messages = msgs
         db.mark_read(active_room["id"], user["id"])
     users = db.list_users()
-    return template("chat", user=user, rooms=rooms, active_room=active_room,
-                    messages=messages, users=users, render_content=_render_content)
+    return template(
+        "chat",
+        user=user,
+        rooms=rooms,
+        active_room=active_room,
+        messages=messages,
+        users=users,
+        render_content=_render_content,
+    )
 
 
 @app.get("/login")

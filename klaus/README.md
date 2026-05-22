@@ -18,8 +18,8 @@ uv run klaus create-admin admin -p test123
 uv run klaus serve
 ```
 
-Open `http://127.0.0.1:8080` in your browser. Register a new user from the
-login page, or sign in with the admin account.
+Open `http://127.0.0.1:8080` in your browser. Register a new user from the login
+page, or sign in with the admin account.
 
 ## Usage
 
@@ -42,8 +42,9 @@ Commands:
     --force                  Overwrite existing database
 ```
 
-The database and secret file default to `~/.kitnega/klaus.db` and `~/.kitnega/klaus_secret`.
-Override with `--db` and `--secret-file` on any command.
+The database and secret file default to `~/.kitnega/klaus.db` and
+`~/.kitnega/klaus_secret`. Override with `--db` and `--secret-file` on any
+command.
 
 ### Creating an admin
 
@@ -66,11 +67,11 @@ automatically added to the `#general` room.
 
 ### Rooms
 
-| Type | Visibility | Joining |
-| ---- | ---------- | ------- |
-| Public | Anyone can see and join | Click room or use `/rooms/<id>/join` |
-| Private | Only members | Invite via DM or group DM |
-| DM | Automatic 1:1 private room | Send `@<user> <message>` from any room |
+| Type    | Visibility                 | Joining                                |
+| ------- | -------------------------- | -------------------------------------- |
+| Public  | Anyone can see and join    | Click room or use `/rooms/<id>/join`   |
+| Private | Only members               | Invite via DM or group DM              |
+| DM      | Automatic 1:1 private room | Send `@<user> <message>` from any room |
 
 - Public rooms have names starting with `#`
 - Private rooms (DMs, group DMs) have auto-generated `_dm_<id1>_<id2>` names
@@ -79,14 +80,14 @@ automatically added to the `#general` room.
 
 ### Direct Messages
 
-Type `@<username> <message>` in any room's message input to send a DM.
-A private room is created automatically between you and the target user.
-Future messages to the same person reuse the same room.
+Type `@<username> <message>` in any room's message input to send a DM. A private
+room is created automatically between you and the target user. Future messages
+to the same person reuse the same room.
 
 ### Search
 
-Messages are indexed with FTS5. Search via `search_messages()` in the DB
-layer (not yet exposed via UI — extend as needed).
+Messages are indexed with FTS5. Search via `search_messages()` in the DB layer
+(not yet exposed via UI — extend as needed).
 
 ## Database schema
 
@@ -104,15 +105,15 @@ salt per user).
 ## Architecture
 
 ```
-                     ┌──────────────────┐
-  Browser ──htmx──►  │  Bottle (WSGI)   │
-  (no JS framework)  │  lib.bottle      │
-                     └────────┬─────────┘
-                              │
-                     ┌────────▼─────────┐
-                     │  sqlite3         │
-                      │  ~/.kitnega/klaus.db │
-                     └──────────────────┘
+                   ┌──────────────────┐
+Browser ──htmx──►  │  Bottle (WSGI)   │
+(no JS framework)  │  lib.bottle      │
+                   └────────┬─────────┘
+                            │
+                   ┌────────▼─────────┐
+                   │  sqlite3         │
+                    │  ~/.kitnega/klaus.db │
+                   └──────────────────┘
 ```
 
 Auth is handled via signed cookies (`user_id` stored in cookie, verified with

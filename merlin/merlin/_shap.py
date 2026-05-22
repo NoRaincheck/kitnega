@@ -13,6 +13,7 @@ from merlin._core import _to_list
 # Scalar expected value (regressor)
 # ---------------------------------------------------------------------------
 
+
 def _expected_value(node, x, known):
     if node.is_leaf:
         return node.prediction
@@ -22,13 +23,13 @@ def _expected_value(node, x, known):
             return _expected_value(node.left, x, known)
         return _expected_value(node.right, x, known)
     left_w = node.left.size / node.size
-    return left_w * _expected_value(node.left, x, known) + \
-           (1 - left_w) * _expected_value(node.right, x, known)
+    return left_w * _expected_value(node.left, x, known) + (1 - left_w) * _expected_value(node.right, x, known)
 
 
 # ---------------------------------------------------------------------------
 # Brute-force SHAP (for verification only, M ≤ 12)
 # ---------------------------------------------------------------------------
+
 
 def _shap_bruteforce(tree, x, M):
     phi = [0.0] * (M + 1)
@@ -42,8 +43,7 @@ def _shap_bruteforce(tree, x, M):
                 if mask & (1 << bit):
                     s_set.add(others[bit])
                     k += 1
-            w = (math.factorial(k) * math.factorial(M - k - 1)
-                 / math.factorial(M))
+            w = math.factorial(k) * math.factorial(M - k - 1) / math.factorial(M)
             with_j = _expected_value(tree.root, x, s_set | {j})
             without = _expected_value(tree.root, x, s_set)
             total += w * (with_j - without)
@@ -55,6 +55,7 @@ def _shap_bruteforce(tree, x, M):
 # ---------------------------------------------------------------------------
 # Polynomial-time TreeSHAP
 # ---------------------------------------------------------------------------
+
 
 def _weight(k, M):
     if k < 0 or k >= M:
@@ -168,6 +169,7 @@ def _tree_shap(tree, x, M, val_fn=None):
     phi : list of length M+1, where phi[M] is the bias.
     """
     if val_fn is None:
+
         def val_fn(node):
             return node.prediction
 
@@ -206,6 +208,7 @@ def _tree_shap(tree, x, M, val_fn=None):
 # ---------------------------------------------------------------------------
 # Forest-level SHAP
 # ---------------------------------------------------------------------------
+
 
 def forest_shap_values(forest, X):
     """Compute SHAP values for a fitted RandomForest.
@@ -247,8 +250,7 @@ def forest_shap_values(forest, X):
             # Pre-compute class-specific bias for this tree (same for all x)
             tree_bias = []
             for c in range(C):
-                phi_c = _tree_shap(tree, X_list[0], M,
-                                   val_fn=lambda node, cc=c: _leaf_proba(node, cc))
+                phi_c = _tree_shap(tree, X_list[0], M, val_fn=lambda node, cc=c: _leaf_proba(node, cc))
                 tree_bias.append(phi_c[M])
 
             for c in range(C):
