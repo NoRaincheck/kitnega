@@ -11,6 +11,7 @@ A monorepo with stdlib-only packages for different domains:
 | `carly`  | Procedural map generator — diamond-square + Voronoi                                 |
 | `merlin` | Random-split forests (ExtraTrees, IsolationForest, Mondrian) with built-in TreeSHAP |
 | `klaus`  | Minimal Slack clone — Bottle + htmx + sqlite3 chat server                           |
+| `lib`    | Shared utilities — vendored modules used across packages                            |
 
 ## cody
 
@@ -140,6 +141,20 @@ See [merlin/README.md](merlin/README.md) for full docs.
 uv run merlin --help
 ```
 
+## klaus
+
+Minimal Slack clone — a chat server with rooms, DMs, and htmx-driven UI.
+Built with `lib.bottle` (Bottle web framework from `lib/`), sqlite3, and htmx.
+Zero JS framework dependencies — just htmx for partial page swaps.
+
+See [klaus/README.md](klaus/README.md) for full docs.
+
+```bash
+uv run klaus init-db          # initialize DB (fails if exists; add --force to reset)
+uv run klaus create-admin     # create an admin user
+uv run klaus serve             # start the server on http://127.0.0.1:8080
+```
+
 ## Workspace
 
 This repository uses
@@ -150,9 +165,8 @@ uv sync              # install all workspace members
 uv run cody <cmd>    # run the coding agent
 uv run duncan <cmd>  # run the TTRPG oracle
 uv run carly <args>  # run the map generator
-uv run merlin       # run ML experiments
-uv run klaus serve    # start the chat server
-uv run klaus init-db  # initialize DB (fails if exists; add --force to reset)
+uv run merlin <cmd>  # run ML experiments
+uv run klaus <cmd>   # run the chat server (serve, init-db, create-admin)
 uv run pytest        # run tests
 uv run ruff check    # lint
 ```

@@ -2,10 +2,11 @@
 
 ## Project
 
-`uv`-managed Python workspace with two member packages: `cody` (`cody/`) and
-`duncan` (`duncan/`). At their core both should only use Python stdlib.
+`uv`-managed Python workspace with six member packages: `cody` (`cody/`),
+`duncan` (`duncan/`), `carly` (`carly/`), `merlin` (`merlin/`), `klaus` (`klaus/`),
+and `lib` (`lib/`). At their core, all packages use only Python stdlib.
 
-`lib` contains single file modules that maybe vendored. Avoid modifying where
+`lib` contains single-file modules that may be vendored. Avoid modifying where
 possible.
 
 ## Workflow
@@ -13,6 +14,9 @@ possible.
 - `uv sync` — install all workspace members
 - `uv run cody <command>` — run the coding agent
 - `uv run duncan <command>` — run the TTRPG oracle
+- `uv run carly <args>` — run the map generator
+- `uv run merlin <cmd>` — run ML experiments
+- `uv run klaus <cmd>` — run the chat server (serve, init-db, create-admin)
 - `uv run pytest` — run tests
 - `uv run ruff check` — lint
 
