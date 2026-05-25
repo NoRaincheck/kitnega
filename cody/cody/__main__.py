@@ -60,6 +60,8 @@ def repl(previous=None, label=None):
 def main():
     import argparse
 
+    from .checkpoint import set_session_id
+
     parser = argparse.ArgumentParser(description="cody — a minimal coding agent")
     group = parser.add_mutually_exclusive_group()
     group.add_argument("-s", "--sessions", action="store_true", help="list available sessions and start repl")
@@ -99,8 +101,11 @@ def main():
         if not args.seed:
             print(_color(90, "refining prompt..."), file=sys.stderr)
             prompt_text = refine_prompt(prompt_text)
+        from .checkpoint import set_session_id
+
         answer, response_id = run(prompt_text, previous)
         if response_id:
+            set_session_id(response_id)
             save_session(response_id, label or prompt_text)
         if answer:
             sys.stdout.write(f"{answer}\n")

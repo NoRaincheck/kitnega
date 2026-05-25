@@ -4,14 +4,25 @@ import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from ._shared import CWD, _color
+from .checkpoint import create_checkpoint
 from .client import USE_STREAM, respond, text
+from .extra_tools import handle_glob
 from .handlers import _handle_bash, _handle_edit, _handle_find, _handle_grep, _handle_ls, _handle_read, _handle_write
+from .permission_gate import gate_command
+from .quality_monitor import assess_response, build_correction_message, phrase_for_user
+from .read_guard import trim_result
 from .system_prompt import build_system_prompt
+from .turn_cap import check_turn_cap, get_turn_cap
+from .write_guard import guard_edit, guard_write
 
 MAX_STEPS = int(os.getenv("KN_MAX_STEPS", "20"))
 APPROVE_ALL = os.getenv("KN_APPROVE", "all").lower() == "all"
-_READONLY_TOOLS = frozenset({"read", "grep", "find", "ls"})
+_TURN_CAP = get_turn_cap()
+_READONLY_TOOLS = frozenset({"read", "grep", "find", "ls", "glob"})
 _RESULT_CACHE = {}
+
+# Track recent tool calls for quality monitoring
+_recent_tool_calls = []
 
 
 def _tool_def(name, desc, props, required):
@@ -24,13 +35,14 @@ def _tool_def(name, desc, props, required):
 
 
 TOOL_SNIPPETS = {
-    "read": "Read a file's content, optionally limiting lines (1-indexed)",
+    "read": "Read a file's content (truncated to 30 lines by default — use Grep first for large files)",
     "write": "Create or overwrite an entire file with given text",
     "edit": "Replace one exact old_string match in a file with new_string",
-    "bash": "Run a shell command and capture output (with optional timeout/cwd/env)",
+    "bash": "Run a shell command and capture output (with optional timeout/cwd/env; default 30s timeout)",
     "grep": "Search files for lines matching a regex pattern, optionally filtering by glob",
     "find": "Find files/dirs matching a glob pattern within a directory tree",
     "ls": "List sorted entries in a directory, marking subdirs with /",
+    "glob": "Glob file search with heavy-dir pruning (node_modules, .git, __pycache__ excluded)",
 }
 
 _PROP_DESC = {
@@ -104,6 +116,12 @@ TOOLS = [
         ["pattern"],
     ),
     _tool_def("ls", TOOL_SNIPPETS["ls"] + ".", {"path": _prop("path", "string")}, []),
+    _tool_def(
+        "glob",
+        TOOL_SNIPPETS["glob"] + ".",
+        {"pattern": _prop("pattern", "string"), "path": _prop("path", "string")},
+        ["pattern"],
+    ),
 ]
 
 
@@ -136,6 +154,7 @@ TOOL_HANDLERS = {
     "grep": _handle_grep,
     "find": _handle_find,
     "ls": _handle_ls,
+    "glob": handle_glob,
 }
 
 
@@ -157,12 +176,15 @@ def tool_output(call):
         if cached is not None:
             return {"type": "function_call_output", "call_id": call["call_id"], "output": cached}
 
+    args = {}
+    key = None
     try:
         args = json.loads(call.get("arguments") or "{}")
     except json.JSONDecodeError as e:
         sys.stderr.write(_color(31, f"[{call['name']}] bad arguments: {e}\n"))
         result = f"bad arguments: {e}"
     else:
+        # Permission gate for bash
         if call["name"] == "bash":
             words = args.get("description", "").split()
             if len(words) == 0:
@@ -172,9 +194,36 @@ def tool_output(call):
                     "call_id": call["call_id"],
                     "output": "bad arguments: description must not be empty",
                 }
+            block = gate_command(args.get("command", ""))
+            if block:
+                return {"type": "function_call_output", "call_id": call["call_id"], "output": block}
+
+        # Write guard for write operations (normalize + refuse existing)
+        if call["name"] == "write":
+            safe_path, err = guard_write(args)
+            if err:
+                return {"type": "function_call_output", "call_id": call["call_id"], "output": err}
+            args["path"] = safe_path
+
+        # Write guard for edit operations (normalize + verify exists)
+        if call["name"] == "edit":
+            safe_path, err = guard_edit(args)
+            if err:
+                return {"type": "function_call_output", "call_id": call["call_id"], "output": err}
+            args["path"] = safe_path
+
+        # Checkpoint before modifications
+        if call["name"] in ("write", "edit") and isinstance(args.get("path"), str):
+            create_checkpoint(args["path"])
+
         result = handler(args) if approve(args, call["name"] in NEEDS_APPROVAL) else _color(31, "denied by user")
 
-    if is_readonly:
+    # Read guard: trim oversized results
+    if is_readonly and isinstance(result, str) and key:
+        path_arg = args.get("path", "")
+        result = trim_result(result, path_arg)
+
+    if is_readonly and key:
         _RESULT_CACHE[key] = result
     else:
         _RESULT_CACHE.clear()
@@ -221,15 +270,40 @@ def refine_prompt(prompt):
 
 
 def run(prompt, previous=None):
+    global _recent_tool_calls
     tool_names = [t["name"] for t in TOOLS]
     system = build_system_prompt(cwd=CWD, selected_tools=tool_names, tool_snippets=TOOL_SNIPPETS)
     response = respond(prompt, system, TOOLS, previous)
-    for _round in range(MAX_STEPS):
+    recent_text = ""
+
+    for turn_idx in range(MAX_STEPS):
+        # Turn cap check
+        if _TURN_CAP and check_turn_cap(turn_idx, _TURN_CAP):
+            sys.stderr.write(_color(31, f"\nTurn limit ({_TURN_CAP}) reached. Stopping.\n"))
+            return "", response.get("id", "")
+
         calls = [x for x in response.get("output", []) if x.get("type") == "function_call"]
         if not calls:
+            recent_text = text(response)
             if USE_STREAM:
                 return "", response.get("id", "")
             return text(response), response.get("id", "")
+
+        # Quality monitoring: assess before executing
+        known_tools = set(tool_names)
+        quality = assess_response(recent_text, calls, _recent_tool_calls, known_tools)
+        if not quality["ok"]:
+            correction = build_correction_message(quality["reason"])
+            sys.stderr.write(_color(31, f"\nharness intervention: {phrase_for_user(quality['reason'])}\n"))
+            # Send correction back to model as a system message
+            response = respond(
+                None,
+                system + "\n\nCorrection: " + correction,
+                TOOLS,
+                response.get("id"),
+            )
+            continue  # don't execute tool calls, just let the model try again
+
         sys.stderr.write("\r\033[K")
         for call in calls:
             args = json.loads(call.get("arguments") or "{}")
@@ -239,5 +313,11 @@ def run(prompt, previous=None):
             sys.stderr.write(_color(90, f"» {call['name']}({params})\n"))
         sys.stderr.flush()
         sys.stdout.flush()
+
+        # Track tool calls for quality monitoring
+        _recent_tool_calls = [
+            {"name": c["name"], "arguments": c.get("arguments", "{}")} for c in calls
+        ]
+
         payload = _execute_calls(calls) if calls else None
         response = respond(payload, system, TOOLS, response.get("id"))

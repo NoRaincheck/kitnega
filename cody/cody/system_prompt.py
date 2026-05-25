@@ -118,6 +118,9 @@ def build_system_prompt(
         if g:
             add_guideline(g)
 
+    add_guideline("Write refuses on existing files — use Edit with exact old_string/new_string instead")
+    add_guideline("Read is trimmed to 30 lines by default — use Grep first for large files")
+    add_guideline("Bash commands have a 30s timeout unless overridden")
     add_guideline("Be concise in your responses")
     add_guideline("Show file paths clearly when working with files")
 
