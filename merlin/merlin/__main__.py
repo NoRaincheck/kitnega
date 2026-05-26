@@ -23,6 +23,12 @@ def main():
     print(f"  {IsolationForest.__name__}")
     print(f"  {MondrianForestClassifier.__name__}")
     print(f"  {MondrianForestRegressor.__name__}")
+    print()
+    print("AutoML:")
+    from merlin.automl import SuccessiveHalving
+    print(f"  {SuccessiveHalving.__name__}(estimator=…, param_grid=…)")
+    print()
+    print("  Successive halving — wraps any estimator, only .fit() called.")
 
 
 if __name__ == "__main__":
