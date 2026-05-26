@@ -315,9 +315,7 @@ def run(prompt, previous=None):
         sys.stdout.flush()
 
         # Track tool calls for quality monitoring
-        _recent_tool_calls = [
-            {"name": c["name"], "arguments": c.get("arguments", "{}")} for c in calls
-        ]
+        _recent_tool_calls = [{"name": c["name"], "arguments": c.get("arguments", "{}")} for c in calls]
 
         payload = _execute_calls(calls) if calls else None
         response = respond(payload, system, TOOLS, response.get("id"))

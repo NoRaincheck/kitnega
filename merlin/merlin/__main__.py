@@ -26,6 +26,7 @@ def main():
     print()
     print("AutoML:")
     from merlin.automl import SuccessiveHalving
+
     print(f"  {SuccessiveHalving.__name__}(estimator=…, param_grid=…)")
     print()
     print("  Successive halving — wraps any estimator, only .fit() called.")

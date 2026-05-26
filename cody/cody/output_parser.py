@@ -43,15 +43,16 @@ def parse_text_tool_calls(text):
             if args_match:
                 try:
                     import json
+
                     input_data = json.loads(args_match.group(1))
-                except (json.JSONDecodeError, ValueError):
+                except json.JSONDecodeError, ValueError:
                     pass
             calls.append({"name": name_match.group(1), "input": input_data})
 
     # Strategy 2: XML-style <tool>...</tool><args>...</args> tags
     for match in re.finditer(r"<tool>\s*(\w+)\s*</tool>", text):
         name = match.group(1)
-        rest = text[match.end():]
+        rest = text[match.end() :]
         args_match = re.search(
             r"<(?:args|arguments)\s*>\s*(\{[\s\S]*?\})\s*</(?:args|arguments)>",
             rest,
@@ -61,8 +62,9 @@ def parse_text_tool_calls(text):
         if args_match:
             try:
                 import json
+
                 input_data = json.loads(args_match.group(1))
-            except (json.JSONDecodeError, ValueError):
+            except json.JSONDecodeError, ValueError:
                 pass
         calls.append({"name": name, "input": input_data})
 

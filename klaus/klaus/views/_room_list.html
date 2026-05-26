@@ -11,13 +11,11 @@
   <span class="room-name">{{room.get("title") or room["name"]}}</span>
   % if not room["is_public"]:
   <span class="tag tag-private">DM</span>
-  % end
-  % if room.get("unread_count"):
+  % end % if room.get("unread_count"):
   <span class="room-badge">{{room["unread_count"]}}</span>
   % end
 </a>
-% end
-% if not rooms:
+% end % if not rooms:
 <div style="padding: 16px; color: #64748b; font-size: 13px; text-align: center">
   No rooms yet
 </div>

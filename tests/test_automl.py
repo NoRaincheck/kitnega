@@ -9,9 +9,7 @@ class TestTrainTestSplit:
         X = array([[i, i + 1] for i in range(100)])
         y = array([i % 2 for i in range(100)])
 
-        X_train, X_val, y_train, y_val = SuccessiveHalving.train_test_split(
-            X, y, test_size=0.25, random_state=42
-        )
+        X_train, X_val, y_train, y_val = SuccessiveHalving.train_test_split(X, y, test_size=0.25, random_state=42)
         assert len(X_train) == 75
         assert len(X_val) == 25
         assert len(y_train) == 75
@@ -24,9 +22,7 @@ class TestTrainTestSplit:
         X = array([[i, i + 1] for i in range(50)])
         y = array([i % 3 for i in range(50)])
 
-        _, X_val, _, _ = SuccessiveHalving.train_test_split(
-            X, y, test_size=0.2, random_state=42
-        )
+        _, X_val, _, _ = SuccessiveHalving.train_test_split(X, y, test_size=0.2, random_state=42)
 
     def test_split_reproducible(self):
         from lib.array import array
@@ -53,8 +49,8 @@ class TestTrainTestSplit:
 class TestSuccessiveHalvingClassifier:
     def test_fit_predict(self):
         from lib.array import array
-        from merlin.forest import ExtraForestClassifier
         from merlin.automl import SuccessiveHalving
+        from merlin.forest import ExtraForestClassifier
 
         X = array([[i, i + 1] for i in range(80)])
         y = array([i % 2 for i in range(80)])
@@ -78,8 +74,8 @@ class TestSuccessiveHalvingClassifier:
 
     def test_predict_proba_shape(self):
         from lib.array import array
-        from merlin.forest import ExtraForestClassifier
         from merlin.automl import SuccessiveHalving
+        from merlin.forest import ExtraForestClassifier
 
         X = array([[i] for i in range(60)])
         y = array([i % 3 for i in range(60)])
@@ -101,8 +97,8 @@ class TestSuccessiveHalvingClassifier:
 class TestSuccessiveHalvingRegressor:
     def test_fit_predict(self):
         from lib.array import array
-        from merlin.forest import ExtraForestRegressor
         from merlin.automl import SuccessiveHalving
+        from merlin.forest import ExtraForestRegressor
 
         X = array([[i] for i in range(80)])
         y = array([2.0 * i + 1.0 for i in range(80)])
@@ -128,8 +124,8 @@ class TestSuccessiveHalvingRegressor:
 class TestHistory:
     def test_history_has_rounds(self):
         from lib.array import array
-        from merlin.forest import ExtraForestClassifier
         from merlin.automl import SuccessiveHalving
+        from merlin.forest import ExtraForestClassifier
 
         X = array([[i] for i in range(60)])
         y = array([i % 2 for i in range(60)])
@@ -153,8 +149,8 @@ class TestHistory:
 
 class TestPredictBeforeFit:
     def test_predict_raises(self):
-        from merlin.forest import ExtraForestClassifier
         from merlin.automl import SuccessiveHalving
+        from merlin.forest import ExtraForestClassifier
 
         sh = SuccessiveHalving(estimator=ExtraForestClassifier())
         try:
@@ -164,8 +160,8 @@ class TestPredictBeforeFit:
             pass
 
     def test_predict_proba_raises(self):
-        from merlin.forest import ExtraForestClassifier
         from merlin.automl import SuccessiveHalving
+        from merlin.forest import ExtraForestClassifier
 
         sh = SuccessiveHalving(estimator=ExtraForestClassifier())
         try:
@@ -188,8 +184,8 @@ class TestEstimatorRequired:
 
 class TestAutoMinResources:
     def test_auto_min_resources(self):
-        from merlin.forest import ExtraForestClassifier
         from merlin.automl import SuccessiveHalving
+        from merlin.forest import ExtraForestClassifier
 
         sh = SuccessiveHalving(
             estimator=ExtraForestClassifier(),
@@ -208,8 +204,8 @@ class TestResourceParam:
     def test_resource_override(self):
         """Verify that the resource param is overridden each round."""
         from lib.array import array
-        from merlin.forest import ExtraForestClassifier
         from merlin.automl import SuccessiveHalving
+        from merlin.forest import ExtraForestClassifier
 
         X = array([[i] for i in range(40)])
         y = array([i % 2 for i in range(40)])
@@ -235,8 +231,8 @@ class TestCustomResource:
     def test_custom_resource_name(self):
         """Test with a different resource parameter name."""
         from lib.array import array
-        from merlin.forest import RandomForest
         from merlin.automl import SuccessiveHalving
+        from merlin.forest import RandomForest
 
         X = array([[i] for i in range(40)])
         y = array([i % 2 for i in range(40)])
@@ -259,8 +255,8 @@ class TestBestConfigContainsResource:
     def test_best_config_has_max_resource(self):
         """The best config should have the resource set to max_resources."""
         from lib.array import array
-        from merlin.forest import ExtraForestClassifier
         from merlin.automl import SuccessiveHalving
+        from merlin.forest import ExtraForestClassifier
 
         X = array([[i] for i in range(40)])
         y = array([i % 2 for i in range(40)])

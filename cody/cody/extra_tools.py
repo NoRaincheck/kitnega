@@ -8,11 +8,25 @@ other large directories by default.
 import fnmatch
 import os
 
-DEFAULT_IGNORE = frozenset([
-    "node_modules", ".git", ".svn", ".hg", ".DS_Store",
-    "__pycache__", ".tox", ".nox", ".venv", "venv",
-    "dist", "build", ".next", ".nuxt", ".output",
-])
+DEFAULT_IGNORE = frozenset(
+    [
+        "node_modules",
+        ".git",
+        ".svn",
+        ".hg",
+        ".DS_Store",
+        "__pycache__",
+        ".tox",
+        ".nox",
+        ".venv",
+        "venv",
+        "dist",
+        "build",
+        ".next",
+        ".nuxt",
+        ".output",
+    ]
+)
 
 
 def glob_walk(pattern, path=None, max_depth=20):

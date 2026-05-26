@@ -19,7 +19,7 @@ def trim_result(result, path):
     # Split on the header line and content
     first_newline = result.index("\n")
     header = result[:first_newline]
-    content = result[first_newline + 1:]
+    content = result[first_newline + 1 :]
 
     lines = content.split("\n")
     if len(lines) <= MAX_LINES:

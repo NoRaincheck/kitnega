@@ -82,8 +82,7 @@ class SuccessiveHalving:
     ):
         if estimator is None:
             raise ValueError(
-                "estimator must be provided. Pass an instance, e.g.\n"
-                "  SuccessiveHalving(ExtraForestClassifier(), ...)"
+                "estimator must be provided. Pass an instance, e.g.\n  SuccessiveHalving(ExtraForestClassifier(), ...)"
             )
         self.estimator = estimator
         self.param_grid = param_grid or {}
@@ -143,7 +142,7 @@ class SuccessiveHalving:
             classes = set(y_true.flat)
             if len(classes) <= 2 and classes.issubset({0, 1}):
                 return _accuracy(y_true, y_pred)
-        except (AttributeError, TypeError):
+        except AttributeError, TypeError:
             pass
         # Fall back: check if estimator has predict_proba to infer task
         if hasattr(self.estimator, "predict_proba"):
@@ -219,9 +218,7 @@ class SuccessiveHalving:
         rng = random.Random(self.random_state)
 
         # Train/validation split
-        X_train, X_val, y_train, y_val = self.train_test_split(
-            X, y, test_size=0.25, random_state=self.random_state
-        )
+        X_train, X_val, y_train, y_val = self.train_test_split(X, y, test_size=0.25, random_state=self.random_state)
 
         resources = self._compute_rounds()
         configs = self._sample_configs(rng)
@@ -253,11 +250,13 @@ class SuccessiveHalving:
 
             results.sort(key=lambda r: (-r[2], rng.random()))
 
-            self.history_.append({
-                "round": round_idx,
-                "resources": current_resources,
-                "results": [{"config": r[1], "score": float(r[2])} for r in results],
-            })
+            self.history_.append(
+                {
+                    "round": round_idx,
+                    "resources": current_resources,
+                    "results": [{"config": r[1], "score": float(r[2])} for r in results],
+                }
+            )
 
             n_keep = max(1, n_remaining // eta)
             configs = [results[i][1] for i in range(n_keep)]
@@ -282,11 +281,13 @@ class SuccessiveHalving:
 
         final_results.sort(key=lambda r: (-r[1], rng.random()))
 
-        self.history_.append({
-            "round": round_idx,
-            "resources": final_resources,
-            "results": [{"config": r[0], "score": float(r[1])} for r in final_results],
-        })
+        self.history_.append(
+            {
+                "round": round_idx,
+                "resources": final_resources,
+                "results": [{"config": r[0], "score": float(r[1])} for r in final_results],
+            }
+        )
 
         # Train best config on full data (train + val) with max resources
         best_config = final_results[0][0]
@@ -299,7 +300,7 @@ class SuccessiveHalving:
         # Combine train + val for final model training
         n_feat = X_train.shape[1]
         all_x_flat = list(X_train.flat) + list(X_val.flat)
-        X_full = array([all_x_flat[i:i+n_feat] for i in range(0, len(all_x_flat), n_feat)])
+        X_full = array([all_x_flat[i : i + n_feat] for i in range(0, len(all_x_flat), n_feat)])
 
         all_y_flat = list(y_train.flat) + list(y_val.flat)
         y_full = array(all_y_flat)

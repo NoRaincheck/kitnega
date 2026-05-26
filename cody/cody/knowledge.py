@@ -27,10 +27,7 @@ def _parse_frontmatter(content):
 
         if value.startswith("[") and value.endswith("]"):
             inner = value[1:-1]
-            fm[key] = [
-                v.strip().strip('"').strip("'")
-                for v in inner.split(",") if v.strip()
-            ]
+            fm[key] = [v.strip().strip('"').strip("'") for v in inner.split(",") if v.strip()]
         else:
             # Parse boolean or integer
             if value.lower() == "false":
@@ -49,7 +46,7 @@ def _extract_body(content):
     """Extract markdown body after frontmatter."""
     match = re.match(r"^---\s*\n[\s\S]*?\n---\s*\n", content)
     if match:
-        return content[match.end():].strip()
+        return content[match.end() :].strip()
     return content.strip()
 
 
@@ -139,12 +136,14 @@ def load_knowledge(knowledge_dirs):
                 continue
 
             fm = _parse_frontmatter(content)
-            all_entries.append({
-                "path": filepath,
-                "name": fm.get("name", filename.replace(".md", "")),
-                "tags": fm.get("tags", []),
-                "body": _extract_body(content),
-            })
+            all_entries.append(
+                {
+                    "path": filepath,
+                    "name": fm.get("name", filename.replace(".md", "")),
+                    "tags": fm.get("tags", []),
+                    "body": _extract_body(content),
+                }
+            )
 
     return all_entries
 
@@ -168,10 +167,7 @@ def select_knowledge(all_entries, prompt):
 
     tokens = tokenize(prompt)
 
-    scored = [
-        (score_entry(entry, tokens), entry)
-        for entry in all_entries
-    ]
+    scored = [(score_entry(entry, tokens), entry) for entry in all_entries]
     scored.sort(key=lambda x: x[0], reverse=True)
 
     selected = [entry for score, entry in scored if score > 0][:MAX_ENTRIES]

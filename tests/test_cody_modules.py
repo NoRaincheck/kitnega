@@ -1,6 +1,5 @@
 """Tests for cody small-model support modules."""
 
-import json
 import os
 import tempfile
 from unittest.mock import patch
@@ -67,7 +66,7 @@ class TestWriteGuard:
         from cody.write_guard import guard_write
 
         # Create a temp file and check refusal with absolute path
-        import tempfile
+
         fd, abs_path = tempfile.mkstemp(prefix="cody_test_")
         os.close(fd)
         try:
@@ -247,9 +246,7 @@ class TestCheckpoint:
             os.makedirs(os.path.expanduser("~/.kitnega/checkpoints"), exist_ok=True)
             create_checkpoint(str(test_file))
 
-            checkpoints = list(
-                tmp_path.parent.glob("*_*/" + test_file.name + ".bak")
-            )
+            checkpoints = list(tmp_path.parent.glob("*_*/" + test_file.name + ".bak"))
             assert len(checkpoints) >= 0  # best-effort, may vary
 
 

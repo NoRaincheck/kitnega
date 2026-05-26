@@ -38,8 +38,7 @@ def assess_response(text, tool_calls, recent_tool_calls, known_tools):
     if tool_calls and recent_tool_calls:
         for tc in tool_calls:
             for prev in recent_tool_calls:
-                if (tc.get("name") == prev.get("name")
-                        and tc.get("arguments", "{}") == prev.get("arguments", "{}")):
+                if tc.get("name") == prev.get("name") and tc.get("arguments", "{}") == prev.get("arguments", "{}"):
                     return {"ok": False, "reason": "repeated_tool_call"}
 
     return {"ok": True}
@@ -64,11 +63,8 @@ def build_correction_message(reason):
     }
 
     if reason.startswith("unknown_tool:"):
-        tool_name = reason[len("unknown_tool:"):]
-        return (
-            f"Tool '{tool_name}' does not exist. "
-            "Available tools are: read, write, edit, bash, grep, find, ls."
-        )
+        tool_name = reason[len("unknown_tool:") :]
+        return f"Tool '{tool_name}' does not exist. Available tools are: read, write, edit, bash, grep, find, ls."
 
     return corrections.get(reason, f"Issue detected: {reason}. Please try again.")
 

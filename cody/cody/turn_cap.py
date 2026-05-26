@@ -14,7 +14,7 @@ def get_turn_cap():
     try:
         val = int(raw)
         return val if val > 0 else None
-    except (ValueError, TypeError):
+    except ValueError, TypeError:
         return 100
 
 

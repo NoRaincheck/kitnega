@@ -3,8 +3,9 @@
 ## Project
 
 `uv`-managed Python workspace with six member packages: `cody` (`cody/`),
-`duncan` (`duncan/`), `carly` (`carly/`), `merlin` (`merlin/`), `klaus` (`klaus/`),
-and `lib` (`lib/`). At their core, all packages use only Python stdlib.
+`duncan` (`duncan/`), `carly` (`carly/`), `merlin` (`merlin/`), `klaus`
+(`klaus/`), and `lib` (`lib/`). At their core, all packages use only Python
+stdlib.
 
 `lib` contains single-file modules that may be vendored. Avoid modifying where
 possible.

@@ -40,10 +40,7 @@ def _parse_frontmatter(content):
         # Parse list values like [a, b, c] or ["a", "b"]
         if value.startswith("[") and value.endswith("]"):
             inner = value[1:-1]
-            fm[key] = [
-                v.strip().strip('"').strip("'")
-                for v in inner.split(",") if v.strip()
-            ]
+            fm[key] = [v.strip().strip('"').strip("'") for v in inner.split(",") if v.strip()]
         else:
             # Parse boolean or integer
             if value.lower() == "false":
@@ -62,7 +59,7 @@ def _extract_body(content):
     """Extract markdown body after frontmatter."""
     match = re.match(r"^---\s*\n[\s\S]*?\n---\s*\n", content)
     if match:
-        return content[match.end():].strip()
+        return content[match.end() :].strip()
     return content.strip()
 
 
@@ -109,16 +106,18 @@ def load_skills(skill_dirs):
                 continue
             seen.add(abs_path)
 
-            all_skills.append({
-                "path": filepath,
-                "name": fm.get("name", filename.replace(".md", "")),
-                "description": fm.get("description", ""),
-                "tags": fm.get("tags", []),
-                "priority": fm.get("priority", 0) or 0,
-                "error_recovery_tags": fm.get("error_recovery_tags", []),
-                "disable_model_invocation": fm.get("disable_model_invocation", False),
-                "body": _extract_body(content),
-            })
+            all_skills.append(
+                {
+                    "path": filepath,
+                    "name": fm.get("name", filename.replace(".md", "")),
+                    "description": fm.get("description", ""),
+                    "tags": fm.get("tags", []),
+                    "priority": fm.get("priority", 0) or 0,
+                    "error_recovery_tags": fm.get("error_recovery_tags", []),
+                    "disable_model_invocation": fm.get("disable_model_invocation", False),
+                    "body": _extract_body(content),
+                }
+            )
 
     # Sort by priority descending
     all_skills.sort(key=lambda s: s["priority"], reverse=True)
@@ -158,9 +157,11 @@ def select_skills(all_skills, failed_tools, recent_tool_names, prompt):
             skill_tags = [t.lower() for t in skill.get("tags", [])]
             recovery_tags = [t.lower() for t in skill.get("error_recovery_tags", [])]
 
-            if (lower_name in skill_tags or
-                    any(r in skill_tags for r in recovery_tags) or
-                    lower_name in skill["body"].lower()):
+            if (
+                lower_name in skill_tags
+                or any(r in skill_tags for r in recovery_tags)
+                or lower_name in skill["body"].lower()
+            ):
                 selected.append(skill)
                 injected.add(skill["path"])
                 break
@@ -185,8 +186,7 @@ def select_skills(all_skills, failed_tools, recent_tool_names, prompt):
         for skill in all_skills:
             if skill["path"] in injected:
                 continue
-            score = sum(1 for t in skill.get("tags", [])
-                       if t.lower() in lower_prompt)
+            score = sum(1 for t in skill.get("tags", []) if t.lower() in lower_prompt)
             if score > 0:
                 scored.append((score, skill))
 

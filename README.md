@@ -143,9 +143,9 @@ uv run merlin --help
 
 ## klaus
 
-Minimal Slack clone — a chat server with rooms, DMs, and htmx-driven UI.
-Built with `lib.bottle` (Bottle web framework from `lib/`), sqlite3, and htmx.
-Zero JS framework dependencies — just htmx for partial page swaps.
+Minimal Slack clone — a chat server with rooms, DMs, and htmx-driven UI. Built
+with `lib.bottle` (Bottle web framework from `lib/`), sqlite3, and htmx. Zero JS
+framework dependencies — just htmx for partial page swaps.
 
 See [klaus/README.md](klaus/README.md) for full docs.
 

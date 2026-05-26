@@ -12,8 +12,7 @@
     <div class="message-content">{{!render_content(msg["content"])}}</div>
   </div>
 </div>
-% end
-% if not messages:
+% end % if not messages:
 <div class="empty-state">
   <h3>{{active_room.get("title") or active_room["name"]}}</h3>
   <p>No messages yet. Say something!</p>

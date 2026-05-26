@@ -285,3 +285,108 @@ class TestConvert:
             assert False, "expected TypeError"
         except TypeError:
             pass
+
+    def test_forest_to_embedding_classifier(self):
+        from lib.array import array
+        from merlin.convert import forest_to_embedding
+        from merlin.forest import ExtraForestClassifier
+
+        X = array([[1.0, 2.0], [2.0, 3.0], [3.0, 4.0], [4.0, 5.0]])
+        y = array([0.0, 0.0, 1.0, 1.0])
+        clf = ExtraForestClassifier(n_estimators=5, max_depth=3, random_state=42)
+        clf.fit(X, y)
+
+        emb = forest_to_embedding(clf, X)
+        assert emb.shape[0] == 4  # n_samples
+        assert emb.shape[1] > 0  # some features from trees
+        # Each row should have exactly one 1.0 per tree
+        for i in range(emb.shape[0]):
+            for ti in range(5):
+                col_start = ti * emb.shape[1] // 5
+                col_end = col_start + (emb.shape[1] // 5)
+                row_slice = sum(emb[i, j] for j in range(col_start, min(col_end, emb.shape[1])))
+                assert abs(row_slice - 1.0) < 1e-10
+
+    def test_forest_to_embedding_regressor(self):
+        from lib.array import array
+        from merlin.convert import forest_to_embedding
+        from merlin.forest import ExtraForestRegressor
+
+        X = array([[1.0], [2.0], [3.0], [4.0]])
+        y = array([1.0, 2.0, 3.0, 4.0])
+        reg = ExtraForestRegressor(n_estimators=5, max_depth=2, random_state=42)
+        reg.fit(X, y)
+
+        emb = forest_to_embedding(reg, X)
+        assert emb.shape[0] == 4
+        # Same-row-sum check per tree
+        n_trees = 5
+        col_per_tree = emb.shape[1] // n_trees + (1 if emb.shape[1] % n_trees else 0)
+        for i in range(emb.shape[0]):
+            for ti in range(n_trees):
+                start = ti * col_per_tree
+                end = min(start + col_per_tree, emb.shape[1])
+                row_sum = sum(emb[i, j] for j in range(start, end))
+                assert abs(row_sum - 1.0) < 1e-10
+
+    def test_forest_to_embedding_mondrian(self):
+        from lib.array import array
+        from merlin.convert import forest_to_embedding
+        from merlin.mondrian import MondrianForestClassifier
+
+        X = array([[1.0, 2.0], [2.0, 3.0], [3.0, 4.0]])
+        y = array([0.0, 1.0, 0.0])
+        clf = MondrianForestClassifier(n_estimators=5, random_state=42)
+        clf.fit(X, y)
+
+        emb = forest_to_embedding(clf, X)
+        assert emb.shape[0] == 3
+        # Verify exactly one 1.0 per tree in each row
+        for i in range(emb.shape[0]):
+            for ti in range(5):
+                col_start = ti * (emb.shape[1] // 5)
+                col_end = min(col_start + (emb.shape[1] // 5), emb.shape[1])
+                row_sum = sum(emb[i, j] for j in range(col_start, col_end))
+                assert abs(row_sum - 1.0) < 1e-10
+
+    def test_forest_to_embedding_empty_forest(self):
+        from lib.array import array
+        from merlin.convert import forest_to_embedding
+
+        class EmptyForest:
+            trees_ = []
+
+        try:
+            forest_to_embedding(EmptyForest(), array([[1.0]]))
+            assert False, "expected ValueError"
+        except ValueError:
+            pass
+
+    def test_forest_to_embedding_consistency(self):
+        from lib.array import array
+        from merlin.convert import forest_to_embedding
+        from merlin.forest import ExtraForestClassifier
+
+        X = array([[1.0, 2.0], [2.0, 3.0], [3.0, 4.0]])
+        y = array([0.0, 1.0, 0.0])
+        clf = ExtraForestClassifier(n_estimators=5, max_depth=3, random_state=42)
+        clf.fit(X, y)
+
+        emb1 = forest_to_embedding(clf, X)
+        emb2 = forest_to_embedding(clf, X)
+        # Same input should produce same embedding (deterministic for trained model)
+        assert list(emb1.flat) == list(emb2.flat)
+
+    def test_forest_to_embedding_different_samples(self):
+        from lib.array import array
+        from merlin.convert import forest_to_embedding
+        from merlin.forest import ExtraForestClassifier
+
+        X = array([[1.0, 2.0], [4.0, 5.0]])
+        y = array([0.0, 1.0])
+        clf = ExtraForestClassifier(n_estimators=5, max_depth=3, random_state=42)
+        clf.fit(X, y)
+
+        emb = forest_to_embedding(clf, X)
+        # Different samples should have different embeddings (at least in some trees)
+        assert list(emb[0]) != list(emb[1])
