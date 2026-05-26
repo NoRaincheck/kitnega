@@ -390,3 +390,226 @@ class TestConvert:
         emb = forest_to_embedding(clf, X)
         # Different samples should have different embeddings (at least in some trees)
         assert list(emb[0]) != list(emb[1])
+
+
+# ---------------------------------------------------------------------------
+# Numerical embedding tests
+# ---------------------------------------------------------------------------
+
+
+class TestPiecewiseLinearEmbedding:
+    def test_basic_shape(self):
+        from lib.array import array
+        from merlin.embeddings import PiecewiseLinearEncoder
+
+        X = array([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
+        enc = PiecewiseLinearEncoder(n_bins=3)
+        emb = enc.fit_transform(X)
+        # Each feature gets len(boundaries)-1+1 output columns per feature
+        assert emb.shape[0] == 3
+        assert emb.shape[1] > 0
+
+    def test_row_sums_per_feature(self):
+        from lib.array import array
+        from merlin.embeddings import PiecewiseLinearEncoder
+
+        X = array([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
+        enc = PiecewiseLinearEncoder(n_bins=3)
+        emb = enc.fit_transform(X)
+        # Each feature's output columns sum to 1.0
+        boundaries = enc.boundaries_
+        for i in range(emb.shape[0]):
+            col_offset = 0
+            for j in range(len(boundaries)):
+                stride = len(boundaries[j]) - 1 + 1
+                s = sum(emb[i, k] for k in range(col_offset, col_offset + stride))
+                assert abs(s - 1.0) < 1e-10
+                col_offset += stride
+
+    def test_values_at_boundaries(self):
+        from lib.array import array
+        from merlin.embeddings import PiecewiseLinearEncoder
+
+        X = array([[0.0], [5.0], [10.0]])
+        enc = PiecewiseLinearEncoder(n_bins=2)
+        emb = enc.fit_transform(X)
+        # First sample at min boundary → all weight on first bin
+        assert abs(emb[0, 0] - 1.0) < 1e-10
+        # Last sample at max boundary → all weight on last bin
+        assert abs(emb[2, 2] - 1.0) < 1e-10
+
+    def test_fit_then_transform(self):
+        from lib.array import array
+        from merlin.embeddings import PiecewiseLinearEncoder
+
+        X_train = array([[1.0], [3.0], [5.0]])
+        X_test = array([[2.0], [4.0]])
+        enc = PiecewiseLinearEncoder(n_bins=3)
+        emb_train = enc.fit_transform(X_train)
+        emb_test = enc.transform(X_test)
+        assert emb_train.shape[0] == 3
+        assert emb_test.shape[0] == 2
+
+    def test_univariate(self):
+        from lib.array import array
+        from merlin.embeddings import piecewise_linear_embedding
+
+        X = array([[1.0], [2.0], [3.0]])
+        emb = piecewise_linear_embedding(X, n_bins=5)
+        assert emb.shape[0] == 3
+        # Each row sum should be 1.0 (single feature)
+        for i in range(3):
+            s = sum(emb[i])
+            assert abs(s - 1.0) < 1e-10
+
+    def test_deterministic(self):
+        from lib.array import array
+        from merlin.embeddings import PiecewiseLinearEncoder
+
+        X = array([[1.0, 2.0], [3.0, 4.0]])
+        enc = PiecewiseLinearEncoder(n_bins=3, random_state=42)
+        emb1 = enc.fit_transform(X.copy())
+        enc2 = PiecewiseLinearEncoder(n_bins=3, random_state=42)
+        emb2 = enc2.fit_transform(X.copy())
+        assert list(emb1.flat) == list(emb2.flat)
+
+    def test_requires_fit(self):
+        from lib.array import array
+        from merlin.embeddings import PiecewiseLinearEncoder
+
+        enc = PiecewiseLinearEncoder()
+        try:
+            enc.transform(array([[1.0]]))
+            assert False, "expected RuntimeError"
+        except RuntimeError:
+            pass
+
+
+class TestPiecewiseLinearForestEncoding:
+    def test_basic_shape(self):
+        from lib.array import array
+        from merlin.embeddings import PiecewiseLinearForestEncoder
+
+        X = array([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
+        enc = PiecewiseLinearForestEncoder(n_estimators=5, n_bins=3, random_state=42)
+        emb = enc.fit_transform(X)
+        assert emb.shape[0] == 3
+        assert emb.shape[1] > 0  # some output features from tree splits
+
+    def test_row_sums(self):
+        from lib.array import array
+        from merlin.embeddings import PiecewiseLinearForestEncoder
+
+        X = array([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
+        enc = PiecewiseLinearForestEncoder(n_estimators=5, n_bins=3, random_state=42)
+        emb = enc.fit_transform(X)
+        # Each feature sums to ~1.0 per row
+        boundaries = enc.boundaries_
+        for i in range(emb.shape[0]):
+            col_offset = 0
+            for j in range(len(boundaries)):
+                stride = len(boundaries[j]) - 1 + 1
+                s = sum(emb[i, k] for k in range(col_offset, col_offset + stride))
+                assert abs(s - 1.0) < 1e-9
+                col_offset += stride
+
+    def test_fit_then_transform(self):
+        from lib.array import array
+        from merlin.embeddings import PiecewiseLinearForestEncoder
+
+        X_train = array([[1.0], [3.0], [5.0]])
+        X_test = array([[2.0], [4.0]])
+        enc = PiecewiseLinearForestEncoder(n_estimators=5, n_bins=3, random_state=42)
+        emb_train = enc.fit_transform(X_train)
+        emb_test = enc.transform(X_test)
+        assert emb_train.shape[0] == 3
+        assert emb_test.shape[0] == 2
+
+    def test_univariate(self):
+        from lib.array import array
+        from merlin.embeddings import piecewise_linear_forest_embedding
+
+        X = array([[1.0], [2.0], [3.0]])
+        emb = piecewise_linear_forest_embedding(X, n_estimators=5, n_bins=5, random_state=42)
+        assert emb.shape[0] == 3
+        for i in range(3):
+            s = sum(emb[i])
+            assert abs(s - 1.0) < 1e-9
+
+    def test_requires_fit(self):
+        from lib.array import array
+        from merlin.embeddings import PiecewiseLinearForestEncoder
+
+        enc = PiecewiseLinearForestEncoder()
+        try:
+            enc.transform(array([[1.0]]))
+            assert False, "expected RuntimeError"
+        except RuntimeError:
+            pass
+
+    def test_different_samples_produce_different_embeddings(self):
+        from lib.array import array
+        from merlin.embeddings import PiecewiseLinearForestEncoder
+
+        X = array([[1.0], [10.0], [50.0], [100.0]])
+        enc = PiecewiseLinearForestEncoder(n_estimators=10, n_bins=3, random_state=42)
+        emb = enc.fit_transform(X)
+        # Different samples should produce different embeddings
+        assert list(emb[0]) != list(emb[1])
+
+    def test_deterministic(self):
+        from lib.array import array
+        from merlin.embeddings import PiecewiseLinearForestEncoder
+
+        X = array([[1.0, 2.0], [3.0, 4.0]])
+        enc1 = PiecewiseLinearForestEncoder(n_estimators=5, n_bins=3, random_state=42)
+        emb1 = enc1.fit_transform(X.copy())
+        enc2 = PiecewiseLinearForestEncoder(n_estimators=5, n_bins=3, random_state=42)
+        emb2 = enc2.fit_transform(X.copy())
+        assert list(emb1.flat) == list(emb2.flat)
+
+
+class TestNumericalEmbeddingFactory:
+    def test_piecewise_linear_strategy(self):
+        from lib.array import array
+        from merlin.embeddings import numerical_embedding
+
+        X = array([[1.0, 2.0], [3.0, 4.0]])
+        emb = numerical_embedding(X, strategy="piecewise-linear", n_bins=3)
+        assert emb.shape[0] == 2
+
+    def test_tree_split_strategy(self):
+        from lib.array import array
+        from merlin.embeddings import numerical_embedding
+
+        X = array([[1.0], [2.0], [3.0]])
+        emb = numerical_embedding(
+            X, strategy="tree-split", n_estimators=5, n_bins=3, random_state=42
+        )
+        assert emb.shape[0] == 3
+
+    def test_invalid_strategy(self):
+        from lib.array import array
+        from merlin.embeddings import numerical_embedding
+
+        try:
+            numerical_embedding(array([[1.0]]), strategy="invalid")
+            assert False, "expected ValueError"
+        except ValueError:
+            pass
+
+    def test_kwargs_passed_to_forest(self):
+        from lib.array import array
+        from merlin.embeddings import numerical_embedding
+
+        X = array([[1.0], [2.0], [3.0]])
+        # max_depth limits tree depth, should still work
+        emb = numerical_embedding(
+            X,
+            strategy="tree-split",
+            n_estimators=5,
+            max_depth=2,
+            n_bins=3,
+            random_state=42,
+        )
+        assert emb.shape[0] == 3
