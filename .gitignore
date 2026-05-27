@@ -21,6 +21,9 @@ wheels/
 # Kitnega config directory (local SQLite dbs, secrets, session files)
 .kitnega/
 
+# Raleigh build output
+docs/_site/
+
 # OS
 .DS_Store
 Thumbs.db

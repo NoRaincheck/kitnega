@@ -1,5 +1,6 @@
 """Tests for Raleigh — static site generator."""
 
+import json
 from datetime import date
 from pathlib import Path
 
@@ -189,6 +190,10 @@ class TestSiteBuild:
         # Homepage markdown (no date → page)
         index_md = src / "index.md"
         index_md.write_text("Welcome to the site.")
+
+        # Config: show recent posts on homepage (tests expect post links there)
+        config = tmp_path / "config.json"
+        config.write_text(json.dumps({"home": "recent"}))
 
         return src, out
 

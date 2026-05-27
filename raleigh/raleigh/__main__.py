@@ -514,8 +514,33 @@ class Site:
         home_mode = self._config.get("home", "page")
 
         if home_mode == "page":
-            # index.html already generated from source/index.md in pages loop above
-            pass
+            # index.html already generated from source/index.md in pages loop above;
+            # fallback to recent posts if no page was written
+            if not (self.output / "index.html").exists() and posts:
+                home_post_list = ""
+                for meta, _path in posts[:10]:
+                    d = parse_date(meta.get("date", ""))
+                    date_format = self._config.get("date_format", "%B %Y")
+                    date_str = d.strftime(date_format) if d else ""
+                    title = meta.get("title", "Untitled")
+                    tag_links = " ".join(f'<a href="/tags/{slugify(t)}.html">{t}</a>' for t in (meta.get("tags") or []))
+                    link_path = f"/posts/{slugify(title)}.html"
+                    home_post_list += (
+                        f'<article class="post-entry"><h2><a href="{link_path}">{title}</a></h2>'
+                        + (
+                            f'\n<p class="post-date">{date_str}' + (f"  · {tag_links}" if tag_links else "") + "</p>"
+                            if date_str or tag_links
+                            else ""
+                        )
+                        + "\n</article>"
+                    )
+                index_html = self._format_page(
+                    "Home",
+                    (home_post_list or "<p>No posts yet.</p>")
+                    + f'<p style="margin-top:2rem"><a href="/blog.html">View all posts →</a></p>',
+                )
+                (self.output / "index.html").write_text(index_html, encoding="utf-8")
+                count += 1
         elif home_mode == "blog":
             # Full blog archive on home page
             blog_index = self._config.get("blog_index", "blog.html")
