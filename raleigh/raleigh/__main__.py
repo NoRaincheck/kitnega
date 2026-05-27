@@ -332,9 +332,14 @@ blockquote {
     margin: 1rem 0; padding: 0.5rem 1rem;
     border-left: 4px solid #6e738d; color: #b8c0e0;
 }
-.site-footer { text-align: center; padding: 2rem 1rem; font-size: 0.8rem; color: #6e738d; }
-a { color: #8aadf4; text-decoration: none; } a:hover { color: #b7bdf8; text-decoration: underline; }
-img { max-width: 100%; height: auto; border-radius: 4px; }
+.post-nav {
+    display: flex; justify-content: space-between;
+    margin-top: 2.5rem; padding-top: 1rem;
+    border-top: 1px solid #5b6078; gap: 1rem;
+}
+.post-nav a { color: #8aadf4; text-decoration: none; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 0.3rem; }
+.post-nav a:hover { color: #b7bdf8; }
+.post-nav .nav-label { color: #6e738d; font-size: 0.8rem; display: block; }
 @media (max-width: 768px) {
     .wrapper { grid-template-columns: 1fr; }
     .sidebar { position: static; border-bottom: 1px solid #5b6078; padding-bottom: 1rem; margin-bottom: 1rem; }
@@ -430,7 +435,8 @@ class Site:
             nav_links=self._nav_links(),
             sidebar_items=self._sidebar_items(),
             footer=self._config.get(
-                "footer", '<a href="https://noraincheck.github.io/kitnega/raleigh/">Built with Raleigh</a>'
+                "footer",
+                '<a href="https://noraincheck.github.io/kitnega/raleigh/">Built with Raleigh</a>',
             ),
             content=content,
         )
@@ -595,8 +601,28 @@ class Site:
             (self.output / "index.html").write_text(index_html, encoding="utf-8")
             count += 1
 
+        # Build a lookup: slug -> index in sorted posts list
+        post_slugs = [slugify(m.get("title", "Untitled")) for m, _ in posts]
+
+        def _post_nav(idx: int) -> str:
+            """Generate prev/next navigation HTML for the post at idx."""
+            parts = []
+            # Previous = newer (index - 1)
+            if idx > 0:
+                prev_title = posts[idx - 1][0].get("title", "Untitled")
+                parts.append(f'<a href="{self.base_url}posts/{post_slugs[idx - 1]}.html">« Previous: {prev_title}</a>')
+            else:
+                parts.append("<span>« Previous</span>")
+            # Next = older (index + 1)
+            if idx < len(posts) - 1:
+                next_title = posts[idx + 1][0].get("title", "Untitled")
+                parts.append(f'<a href="{self.base_url}posts/{post_slugs[idx + 1]}.html">Next: {next_title} »</a>')
+            else:
+                parts.append("<span>Next »</span>")
+            return '<div class="post-nav">' + "\n".join(parts) + "</div>"
+
         # Generate per-page HTML for each post
-        for meta, md_file in posts:
+        for idx, (meta, md_file) in enumerate(posts):
             body = parse_front_matter(md_file.read_text(encoding="utf-8"))[1]
             html_body = md_to_html(body)
             title = meta.get("title", "Untitled")
@@ -610,7 +636,9 @@ class Site:
                 f'<h1>{title}</h1>\n<p class="post-date">{date_str}'
                 + (f"  · {tag_links}" if tag_links else "")
                 + "</p>\n\n"
-                + html_body,
+                + html_body
+                + "\n\n"
+                + _post_nav(idx),
             )
             out_path = self.output / "posts" / f"{slugify(title)}.html"
             out_path.parent.mkdir(parents=True, exist_ok=True)
