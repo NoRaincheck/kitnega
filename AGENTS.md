@@ -2,10 +2,10 @@
 
 ## Project
 
-`uv`-managed Python workspace with six member packages: `cody` (`cody/`),
+`uv`-managed Python workspace with seven member packages: `cody` (`cody/`),
 `duncan` (`duncan/`), `carly` (`carly/`), `merlin` (`merlin/`), `klaus`
-(`klaus/`), and `lib` (`lib/`). At their core, all packages use only Python
-stdlib.
+(`klaus/`), `raleigh` (`raleigh/`), and `lib` (`lib/`). At their core, all
+packages use only Python stdlib.
 
 `lib` contains single-file modules that may be vendored. Avoid modifying where
 possible.
@@ -18,6 +18,7 @@ possible.
 - `uv run carly <args>` — run the map generator
 - `uv run merlin <cmd>` — run ML experiments
 - `uv run klaus <cmd>` — run the chat server (serve, init-db, create-admin)
+- `uv run raleigh` — build static site from markdown source
 - `uv run pytest` — run tests
 - `uv run ruff check` — lint
 

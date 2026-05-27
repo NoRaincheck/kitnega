@@ -4,14 +4,15 @@
 
 A monorepo with stdlib-only packages for different domains:
 
-| Package  | Role                                                                                |
-| -------- | ----------------------------------------------------------------------------------- |
-| `cody`   | Agentic coding harness — LLM-powered coding agent                                   |
-| `duncan` | TTRPG procedural oracle — dice-driven random generation                             |
-| `carly`  | Procedural map generator — diamond-square + Voronoi                                 |
-| `merlin` | Random-split forests (ExtraTrees, IsolationForest, Mondrian) with built-in TreeSHAP |
-| `klaus`  | Minimal Slack clone — Bottle + htmx + sqlite3 chat server                           |
-| `lib`    | Shared utilities — vendored modules used across packages                            |
+| Package   | Role                                                                                |
+| --------- | ----------------------------------------------------------------------------------- |
+| `cody`    | Agentic coding harness — LLM-powered coding agent                                   |
+| `duncan`  | TTRPG procedural oracle — dice-driven random generation                             |
+| `carly`   | Procedural map generator — diamond-square + Voronoi                                 |
+| `merlin`  | Random-split forests (ExtraTrees, IsolationForest, Mondrian) with built-in TreeSHAP |
+| `klaus`   | Minimal Slack clone — Bottle + htmx + sqlite3 chat server                           |
+| `raleigh` | Static site generator from markdown with front-matter                               |
+| `lib`     | Shared utilities — vendored modules used across packages                            |
 
 ## cody
 
@@ -155,6 +156,26 @@ uv run klaus create-admin     # create an admin user
 uv run klaus serve             # start the server on http://127.0.0.1:8080
 ```
 
+## raleigh
+
+A minimal static site generator from markdown with front-matter. Pure Python
+stdlib, zero dependencies.
+
+```bash
+uv run raleigh                        # build source/ → _site/
+uv run raleigh -o docs/_site          # custom output directory
+uv run raleigh --title "My Blog"       # override site title
+```
+
+Directory layout:
+```
+source/
+  index.md                  Homepage
+  posts/2026-05-26-post.md  Blog posts (date in front-matter)
+  about/index.md            Sub-pages
+  assets/                   Static files (copied verbatim)
+```
+
 ## Workspace
 
 This repository uses
@@ -167,6 +188,7 @@ uv run duncan <cmd>  # run the TTRPG oracle
 uv run carly <args>  # run the map generator
 uv run merlin <cmd>  # run ML experiments
 uv run klaus <cmd>   # run the chat server (serve, init-db, create-admin)
+uv run raleigh       # build static site from markdown source
 uv run pytest        # run tests
 uv run ruff check    # lint
 ```

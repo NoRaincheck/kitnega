@@ -6,13 +6,14 @@ title: kitnega — Agenti(k) Backwards
 
 > *agenti(k)* backwards — a monorepo of stdlib-only Python tools.
 
-| Package  | Role                                                                                |
-| -------- | ----------------------------------------------------------------------------------- |
+| Package    | Role                                                                                |
+| ---------- | ----------------------------------------------------------------------------------- |
 | [Cody](/cody/)   | Agentic coding harness — LLM-powered coding agent                                   |
 | [Duncan](/duncan/) | TTRPG procedural oracle — dice-driven random generation                             |
 | [Carly](/carly/)  | Procedural map generator — diamond-square + Voronoi                                 |
 | [Merlin](/merlin/) | Random-split forests (ExtraTrees, IsolationForest, Mondrian) with built-in TreeSHAP |
 | [Klaus](/klaus/)  | Minimal Slack clone — Bottle + htmx + sqlite3 chat server                           |
+| [Raleigh](/raleigh/) | Static site generator from markdown with front-matter                               |
 
 ## Workspace
 
@@ -25,6 +26,7 @@ uv run duncan <cmd>  # run the TTRPG oracle
 uv run carly <args>  # run the map generator
 uv run merlin <cmd>  # run ML experiments
 uv run klaus <cmd>   # run the chat server (serve, init-db, create-admin)
+uv run raleigh       # build static site from markdown source
 uv run pytest        # run tests
 uv run ruff check    # lint
 ```
