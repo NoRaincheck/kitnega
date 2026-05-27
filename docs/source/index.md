@@ -8,12 +8,12 @@ title: kitnega — Agenti(k) Backwards
 
 | Package    | Role                                                                                |
 | ---------- | ----------------------------------------------------------------------------------- |
-| [Cody](/cody/)   | Agentic coding harness — LLM-powered coding agent                                   |
-| [Duncan](/duncan/) | TTRPG procedural oracle — dice-driven random generation                             |
-| [Carly](/carly/)  | Procedural map generator — diamond-square + Voronoi                                 |
-| [Merlin](/merlin/) | Random-split forests (ExtraTrees, IsolationForest, Mondrian) with built-in TreeSHAP |
-| [Klaus](/klaus/)  | Minimal Slack clone — Bottle + htmx + sqlite3 chat server                           |
-| [Raleigh](/raleigh/) | Static site generator from markdown with front-matter                               |
+| [Cody](/kitnega/cody/)   | Agentic coding harness — LLM-powered coding agent                                   |
+| [Duncan](/kitnega/duncan/) | TTRPG procedural oracle — dice-driven random generation                             |
+| [Carly](/kitnega/carly/)  | Procedural map generator — diamond-square + Voronoi                                 |
+| [Merlin](/kitnega/merlin/) | Random-split forests (ExtraTrees, IsolationForest, Mondrian) with built-in TreeSHAP |
+| [Klaus](/kitnega/klaus/)  | Minimal Slack clone — Bottle + htmx + sqlite3 chat server                           |
+| [Raleigh](/kitnega/raleigh/) | Static site generator from markdown with front-matter                               |
 
 ## Workspace
 
