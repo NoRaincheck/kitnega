@@ -1,14 +1,13 @@
 import json
-import os
 import sys
 import threading
 from urllib.request import Request, urlopen
 
-from lib.llm import API, MODEL
+from lib.config import get_config
+from lib.llm import API as _api_func
+from lib.llm import MODEL as _model_func
 
 from ._shared import _TTY, _color
-
-USE_STREAM = os.getenv("KN_STREAM", "1") in ("1", "true", "yes", "")
 
 _SPINNER_TEXT = "Working..."
 
@@ -21,7 +20,7 @@ def _spinner(done, frames="⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏"):
 
 
 def _build_body(payload, system, tools, previous, stream):
-    body = {"model": MODEL, "instructions": system, "tools": tools, "input": payload}
+    body = {"model": _model_func(), "instructions": system, "tools": tools, "input": payload}
     if previous:
         body["previous_response_id"] = previous
     if stream:
@@ -31,14 +30,14 @@ def _build_body(payload, system, tools, previous, stream):
 
 def _headers():
     headers = {"Content-Type": "application/json"}
-    key = os.getenv("KN_API_KEY") or ""
+    key = get_config().get("api_key", "") or ""
     if key:
         headers["Authorization"] = f"Bearer {key}"
     return headers
 
 
 def _request(body, headers):
-    return urlopen(Request(API, json.dumps(body).encode(), headers=headers))
+    return urlopen(Request(_api_func(), json.dumps(body).encode(), headers=headers))
 
 
 def _sse_events(response):
@@ -154,7 +153,7 @@ def _stream_respond(body, headers, spinner_done=None):
 
 def respond(payload, system, tools, previous=None, stream=None):
     if stream is None:
-        stream = USE_STREAM
+        stream = get_config().get("stream", True)
     body = _build_body(payload, system, tools, previous, stream)
     headers = _headers()
     spinner_done = threading.Event() if _TTY else None

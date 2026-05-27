@@ -2,7 +2,6 @@
 
 import os
 import tempfile
-from unittest.mock import patch
 
 
 class TestReadGuard:
@@ -13,13 +12,18 @@ class TestReadGuard:
         assert trim_result(short, "foo.txt") == short  # no trimming needed
 
     def test_trim_long_result(self):
+        from lib.config import save_config, reload_config
         from cody.read_guard import MAX_LINES, trim_result
+
+        cfg = {"read_limit": 30}
+        save_config(cfg)
+        reload_config()
 
         content_lines = "\n".join(f"line{i}" for i in range(50))
         long_result = f"--- foo.txt (50 lines)\n{content_lines}"
         trimmed = trim_result(long_result, "foo.txt")
 
-        assert len(trimmed.split("\n")) <= MAX_LINES + 3  # header + content + TRIMMED notice
+        assert len(trimmed.split("\n")) <= MAX_LINES() + 3  # header + content + TRIMMED notice
         assert "[TRIMMED:" in trimmed
         assert "20 more lines" in trimmed
 
@@ -173,22 +177,27 @@ class TestQualityMonitor:
 
 class TestTurnCap:
     def test_default_cap(self):
+        from lib.config import save_config
         from cody.turn_cap import get_turn_cap
 
-        with patch.dict(os.environ, {}, clear=False):
-            # Ensure no KN_MAX_TURNS is set
-            env = os.environ.copy()
-            if "KN_MAX_TURNS" in env:
-                del env["KN_MAX_TURNS"]
-            with patch.dict(os.environ, env, clear=True):
-                cap = get_turn_cap()
-                assert cap == 100
+        cfg = {"turn_cap": 100}
+        save_config(cfg)
+        assert get_turn_cap() == 100
 
     def test_custom_cap(self):
-        from cody.turn_cap import get_turn_cap
+        import importlib
 
-        with patch.dict(os.environ, {"KN_MAX_TURNS": "50"}):
-            assert get_turn_cap() == 50
+        from lib.config import save_config, reload_config
+
+        cfg = {"turn_cap": 50}
+        save_config(cfg)
+        reload_config()
+        # Force reimport to clear module-level cache
+        if "cody.turn_cap" in __import__("sys").modules:
+            del __import__("sys").modules["cody.turn_cap"]
+        from cody import turn_cap
+
+        assert turn_cap.get_turn_cap() == 50
 
     def test_check_exceeded(self):
         from cody.turn_cap import check_turn_cap
@@ -212,12 +221,15 @@ class TestPermissionGate:
         assert result is None
 
     def test_blocked_dangerous_command(self):
+        from lib.config import save_config, reload_config
         from cody.permission_gate import gate_command
 
-        with patch.dict(os.environ, {"KN_BASH_MODE": "auto"}):
-            # Dangerous commands like sudo or curl piped to bash are blocked
-            result = gate_command("sudo rm -rf /")
-            assert result is not None
+        cfg = {"bash_mode": "auto"}
+        save_config(cfg)
+        reload_config()
+        # Dangerous commands like sudo or curl piped to bash are blocked
+        result = gate_command("sudo rm -rf /")
+        assert result is not None
 
     def test_allowed_safe_rm(self):
         from cody.permission_gate import gate_command
@@ -227,11 +239,14 @@ class TestPermissionGate:
         assert result is None
 
     def test_accept_all_mode(self):
+        from lib.config import save_config, reload_config
         from cody.permission_gate import gate_command
 
-        with patch.dict(os.environ, {"KN_BASH_MODE": "accept-all"}):
-            result = gate_command("rm -rf /")
-            assert result is None
+        cfg = {"bash_mode": "accept-all"}
+        save_config(cfg)
+        reload_config()
+        result = gate_command("rm -rf /")
+        assert result is None
 
 
 class TestCheckpoint:
@@ -241,13 +256,12 @@ class TestCheckpoint:
         test_file = tmp_path / "test.txt"
         test_file.write_text("original content")
 
-        with patch.dict(os.environ, {}, clear=False):
-            # Ensure checkpoint dir exists
-            os.makedirs(os.path.expanduser("~/.kitnega/checkpoints"), exist_ok=True)
-            create_checkpoint(str(test_file))
+        # Ensure checkpoint dir exists
+        os.makedirs(os.path.expanduser("~/.kitnega/checkpoints"), exist_ok=True)
+        create_checkpoint(str(test_file))
 
-            checkpoints = list(tmp_path.parent.glob("*_*/" + test_file.name + ".bak"))
-            assert len(checkpoints) >= 0  # best-effort, may vary
+        checkpoints = list(tmp_path.parent.glob("*_*/" + test_file.name + ".bak"))
+        assert len(checkpoints) >= 0  # best-effort, may vary
 
 
 class TestExtraTools:

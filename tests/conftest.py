@@ -2,11 +2,13 @@ import os
 
 import pytest
 
+from lib.config import reload_config
+
 
 @pytest.fixture(autouse=True)
-def _clean_cody_state(monkeypatch):
-    """Reset cached state in cody modules before each test."""
-    monkeypatch.delenv("KN_API", raising=False)  # disable real API calls by default
+def _reset_config():
+    """Reset config cache before each test so tests start with a clean slate."""
+    reload_config()
 
 
 @pytest.fixture()

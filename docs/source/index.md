@@ -33,16 +33,34 @@ uv run ruff check    # lint
 
 ## Configuration
 
-All config is generated from `~/.kitnega/` — the directory is created on first use by each tool.
+All config is stored in JSON files under `~/.kitnega/` — the directory is created on first use. There are no environment variables.
 
-| Variable       | Default                              | Tool     | Purpose                  |
-| -------------- | ------------------------------------ | -------- | ------------------------ |
-| `KN_API`       | `http://localhost:1234/v1/responses` | Cody/lib | LLM API endpoint         |
-| `KN_MODEL`     | `qwen3.6-35b-a3b`                    | Cody/lib | Model name               |
-| `KN_API_KEY`   | _(empty)_                            | Cody/lib | API key for LLM          |
-| `KN_STREAM`    | `1`                                  | Cody     | SSE streaming toggle     |
-| `KN_MAX_STEPS` | `20`                                 | Cody     | Max tool call iterations |
-| `KN_APPROVE`   | `all`                                | Cody     | Auto-approve mode        |
+### Shared settings (`config.json`)
+
+Cody and lib read from a single shared config file:
+
+```json
+{
+  "api": "http://localhost:1234/v1/responses",
+  "model": "qwen3.6-35b-a3b",
+  "api_key": "",
+  "stream": true,
+  "max_steps": 20,
+  "approve_all": false,
+  "read_limit": 30,
+  "turn_cap": 100,
+  "bash_mode": "auto",
+  "bash_allow": []
+}
+```
+
+### Tool-specific files
+
+| Path                           | Tool     | Purpose              |
+| ------------------------------ | -------- | -------------------- |
+| `~/.kitnega/sessions.json`     | Cody     | Session persistence  |
+| `~/.kitnega/klaus.db`          | Klaus    | SQLite chat database |
+| `~/.kitnega/klaus_secret`      | Klaus    | HMAC signing secret  |
 
 ## Inspired By
 

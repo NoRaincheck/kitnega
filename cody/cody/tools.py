@@ -1,11 +1,12 @@
 import json
-import os
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
+from lib.config import get_config, save_config
+
 from ._shared import CWD, _color
 from .checkpoint import create_checkpoint
-from .client import USE_STREAM, respond, text
+from .client import respond, text
 from .extra_tools import handle_glob
 from .handlers import _handle_bash, _handle_edit, _handle_find, _handle_grep, _handle_ls, _handle_read, _handle_write
 from .permission_gate import gate_command
@@ -15,8 +16,6 @@ from .system_prompt import build_system_prompt
 from .turn_cap import check_turn_cap, get_turn_cap
 from .write_guard import guard_edit, guard_write
 
-MAX_STEPS = int(os.getenv("KN_MAX_STEPS", "20"))
-APPROVE_ALL = os.getenv("KN_APPROVE", "all").lower() == "all"
 _TURN_CAP = get_turn_cap()
 _READONLY_TOOLS = frozenset({"read", "grep", "find", "ls", "glob"})
 _RESULT_CACHE = {}
@@ -128,18 +127,19 @@ TOOLS = [
 def approve(args, requires_approval):
     if not requires_approval:
         return True
-    global APPROVE_ALL
+    cfg = get_config()
     for k, v in {k: v for k, v in args.items() if k != "description" and v is not None}.items():
         val = v if len(str(v)) < 80 else str(v)[:77] + "..."
         print(f"{_color(32, k)}: {_color(90, val)}", file=sys.stderr)
-    if APPROVE_ALL:
+    if cfg.get("approve_all"):
         return True
     try:
         choice = input("Approve? [y]yes  [a]all  [n]no: ").strip().lower()
     except EOFError:
         return False
     if choice in ("a", "all"):
-        APPROVE_ALL = True
+        cfg["approve_all"] = True
+        save_config(cfg)
         return True
     return choice in ("y", "yes")
 
@@ -238,7 +238,7 @@ def _execute_calls(calls):
         groups.setdefault(key, []).append(c)
 
     uniques = [g[0] for g in groups.values()]
-    if APPROVE_ALL and len(uniques) > 1:
+    if get_config().get("approve_all") and len(uniques) > 1:
         by_id = {}
         with ThreadPoolExecutor() as pool:
             fmap = {pool.submit(tool_output, c): c["call_id"] for c in uniques}
@@ -276,7 +276,8 @@ def run(prompt, previous=None):
     response = respond(prompt, system, TOOLS, previous)
     recent_text = ""
 
-    for turn_idx in range(MAX_STEPS):
+    max_steps = get_config().get("max_steps", 20)
+    for turn_idx in range(max_steps):
         # Turn cap check
         if _TURN_CAP and check_turn_cap(turn_idx, _TURN_CAP):
             sys.stderr.write(_color(31, f"\nTurn limit ({_TURN_CAP}) reached. Stopping.\n"))
@@ -285,7 +286,7 @@ def run(prompt, previous=None):
         calls = [x for x in response.get("output", []) if x.get("type") == "function_call"]
         if not calls:
             recent_text = text(response)
-            if USE_STREAM:
+            if get_config().get("stream", True):
                 return "", response.get("id", "")
             return text(response), response.get("id", "")
 

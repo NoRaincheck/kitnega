@@ -5,9 +5,12 @@ entire conversation. This module enforces a per-read line limit (default 30) and
 suggests grep/find for deeper inspection.
 """
 
-import os
+from lib.config import get_config
 
-MAX_LINES = int(os.getenv("KN_READ_LIMIT", "30"))
+
+def MAX_LINES():
+    """Max lines per read (read from config)."""
+    return get_config().get("read_limit", 30)
 
 
 def trim_result(result, path):
@@ -21,14 +24,15 @@ def trim_result(result, path):
     header = result[:first_newline]
     content = result[first_newline + 1 :]
 
+    max_lines = MAX_LINES()
     lines = content.split("\n")
-    if len(lines) <= MAX_LINES:
+    if len(lines) <= max_lines:
         return result
 
-    trimmed = "\n".join(lines[:MAX_LINES])
-    remaining = len(lines) - MAX_LINES
+    trimmed = "\n".join(lines[:max_lines])
+    remaining = len(lines) - max_lines
     return (
-        f"{header} (truncated to {MAX_LINES} of {len(lines)} lines)\n"
+        f"{header} (truncated to {max_lines} of {len(lines)} lines)\n"
         f"{trimmed}\n"
         f"[TRIMMED: {remaining} more lines omitted. "
         f"Use Grep or Find to locate specific content.]"

@@ -5,8 +5,6 @@ for sending prompts to an LLM and retrieving the text response.
 
 Example
 -------
-    >>> import os
-    >>> os.environ["KN_API"] = "http://localhost:1234/v1/responses"
     >>> from lib.llm import prompt
     >>> result = prompt("What is 2+2?")
     >>> print(result)
@@ -20,16 +18,24 @@ Or from the command line:
 
 import argparse
 import json
-import os
 import sys
 from urllib.request import Request, urlopen
 
-API = os.getenv("KN_API", "http://localhost:1234/v1/responses")
-MODEL = os.getenv("KN_MODEL", "qwen3.6-35b-a3b")
+from .config import get_config
+
+
+def API():
+    """API endpoint URL (read from config)."""
+    return get_config()["api"]
+
+
+def MODEL():
+    """Model name (read from config)."""
+    return get_config()["model"]
 
 
 def _api_key():
-    return os.getenv("KN_API_KEY") or ""
+    return get_config().get("api_key", "") or ""
 
 
 def _headers():
@@ -42,12 +48,12 @@ def _headers():
 
 def prompt(input_text, system="", model=None, timeout=300):
     body = {
-        "model": model or MODEL,
+        "model": model or MODEL(),
         "instructions": system,
         "input": input_text,
     }
     resp = urlopen(
-        Request(API, json.dumps(body).encode(), _headers()),
+        Request(API(), json.dumps(body).encode(), _headers()),
         timeout=timeout,
     )
     data = json.load(resp)

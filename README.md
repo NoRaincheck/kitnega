@@ -49,19 +49,7 @@ uv run cody -c
 uv run cody -s
 
 # Auto-approve (YOLO mode) — also enables parallel tool execution
-KN_APPROVE=all uv run cody "run tests and fix failures"
-```
-
-### Configuration
-
-Set via environment variables:
-
-```bash
-export KN_API="http://localhost:1234/v1/responses"
-export KN_MODEL="qwen3.6-35b-a3b"
-export KN_API_KEY="your-key"  # optional
-export KN_STREAM="1"          # enable SSE streaming for real-time output (default: 1)
-export KN_MAX_STEPS="20"      # max tool call iterations (default: 20)
+# Set "approve_all": true in ~/.kitnega/config.json
 ```
 
 ### Features

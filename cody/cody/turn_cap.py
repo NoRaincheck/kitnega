@@ -1,16 +1,16 @@
 """Turn cap: enforce maximum turns per agent run.
 
 Small models can loop endlessly without a turn limit. This module provides
-a configurable max-turns via KN_MAX_TURNS environment variable (default 100).
+a configurable max-turns via the ``turn_cap`` config key (default 100).
 When exceeded, the run() function returns with an abort message.
 """
 
-import os
+from lib.config import get_config
 
 
 def get_turn_cap():
     """Return the configured maximum number of turns."""
-    raw = os.getenv("KN_MAX_TURNS", "100")
+    raw = get_config().get("turn_cap", 100)
     try:
         val = int(raw)
         return val if val > 0 else None

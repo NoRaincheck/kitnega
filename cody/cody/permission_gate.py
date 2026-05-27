@@ -6,12 +6,10 @@ configurable whitelist of allowed bash command prefixes with three modes:
 - accept-all: no gating
 - manual: prompt user for each blocked command
 
-Config via environment variables:
-  KN_BASH_MODE   - "auto" | "accept-all" | "manual" (default: "auto")
-  KN_BASH_ALLOW  - comma-separated extra allow prefixes
+Config is read from ``~/.kitnega/config.json``.
 """
 
-import os
+from lib.config import get_config, save_config
 
 DEFAULT_ALLOW_LIST = frozenset(
     [
@@ -88,18 +86,31 @@ DEFAULT_ALLOW_LIST = frozenset(
 
 def get_mode():
     """Return the permission gate mode."""
-    raw = os.getenv("KN_BASH_MODE", "auto")
+    raw = get_config().get("bash_mode", "auto")
     if raw in ("auto", "accept-all", "manual"):
         return raw
     return "auto"
 
 
 def get_extra_prefixes():
-    """Parse KN_BASH_ALLOW into a list of extra prefixes."""
-    raw = os.getenv("KN_BASH_ALLOW", "")
-    if not raw:
-        return []
-    return [p.strip() for p in raw.split(",") if p.strip()]
+    """Return extra allow prefixes from config."""
+    return list(get_config().get("bash_allow", []))
+
+
+def set_bash_mode(mode):
+    """Set the bash permission gate mode in config."""
+    if mode not in ("auto", "accept-all", "manual"):
+        raise ValueError(f"Invalid bash_mode: {mode!r}")
+    cfg = get_config()
+    cfg["bash_mode"] = mode
+    save_config(cfg)
+
+
+def set_bash_allow(prefixes):
+    """Set extra allow prefixes in config."""
+    cfg = get_config()
+    cfg["bash_allow"] = list(prefixes) if isinstance(prefixes, (list, tuple)) else [p.strip() for p in str(prefixes).split(",") if p.strip()]
+    save_config(cfg)
 
 
 def is_command_allowed(command):

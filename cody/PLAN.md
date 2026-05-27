@@ -41,16 +41,15 @@ paths exist before processing.
 
 #### 4. Read Guard (`cody/read_guard.py`)
 
-In `_handle_read`: limits to first 30 lines by default (configurable via
-`KN_READ_LIMIT`). Appends "[TRIMMED: N more lines]" message with grep
-suggestion.
+In `_handle_read`: limits to first 30 lines by default (configurable via `read_limit`
+in config). Appends "[TRIMMED: N more lines]" message with grep suggestion.
 
 ### Phase 2: Control & Safety ✅
 
 #### 5. Turn Cap (`cody/turn_cap.py`)
 
-`KN_MAX_TURNS` env var (default 100). In the run() loop, aborts with clear
-message when limit exceeded. Prevents small models from looping endlessly.
+Configurable `turn_cap` in config (default 100). In the run() loop, aborts with
+clear message when limit exceeded. Prevents small models from looping endlessly.
 
 #### 6. Permission Gate (`cody/permission_gate.py`)
 
@@ -61,7 +60,8 @@ Configurable whitelist of allowed bash command prefixes. Three modes:
 - `manual`: prompt user for each blocked command
 
 Whitelist includes git subcommands, npm/pnpm/yarn, pip/cargo/go commands, file
-operations (cp/mv/touch), search tools. Extra prefixes via `KN_BASH_ALLOW`.
+operations (cp/mv/touch), search tools. Extra prefixes configurable via `bash_allow`
+in config.
 
 #### 7. Checkpoint (`cody/checkpoint.py`)
 
@@ -98,16 +98,16 @@ Added small-model-specific guidelines:
 - "Read is trimmed to 30 lines by default — use Grep first for large files"
 - "Bash commands have a 30s timeout unless overridden"
 
-#### 12. Configuration (`__main__.py`, `tools.py`)
+#### 12. Configuration (`lib/lib/config.py`, `tools.py`)
 
-New env vars:
+Shared JSON config at `~/.kitnega/config.json` with keys:
 
-| Variable        | Default | Purpose                          |
-| --------------- | ------- | -------------------------------- |
-| `KN_MAX_TURNS`  | `100`   | Max turns per run                |
-| `KN_BASH_MODE`  | `auto`  | Permission gate mode             |
-| `KN_BASH_ALLOW` | ``      | Extra allow prefixes (comma-sep) |
-| `KN_READ_LIMIT` | `30`    | Default read line limit          |
+| Key           | Default | Purpose                          |
+| ------------- | ------- | -------------------------------- |
+| `turn_cap`    | `100`   | Max turns per run                |
+| `bash_mode`   | `auto`  | Permission gate mode             |
+| `bash_allow`  | `[]`    | Extra allow prefixes             |
+| `read_limit`  | `30`    | Default read line limit          |
 
 ---
 
