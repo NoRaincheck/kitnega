@@ -429,7 +429,9 @@ class Site:
             css=css_escaped,
             nav_links=self._nav_links(),
             sidebar_items=self._sidebar_items(),
-            footer=self._config.get("footer", "Built with Raleigh"),
+            footer=self._config.get(
+                "footer", '<a href="https://noraincheck.github.io/kitnega/raleigh/">Built with Raleigh</a>'
+            ),
             content=content,
         )
 
@@ -496,7 +498,9 @@ class Site:
             date_format = self._config.get("date_format", "%B %Y")
             date_str = d.strftime(date_format) if d else ""
             title = meta.get("title", "Untitled")
-            tag_links = " ".join(f'<a href="{self._abs("/tags/" + slugify(t) + ".html")}">{t}</a>' for t in (meta.get("tags") or []))
+            tag_links = " ".join(
+                f'<a href="{self._abs("/tags/" + slugify(t) + ".html")}">{t}</a>' for t in (meta.get("tags") or [])
+            )
             link_path = f"{self.base_url}posts/{slugify(title)}.html"
             post_links += (
                 f'<article class="post-entry"><h2><a href="{link_path}">{title}</a></h2>'
@@ -531,7 +535,10 @@ class Site:
                     date_format = self._config.get("date_format", "%B %Y")
                     date_str = d.strftime(date_format) if d else ""
                     title = meta.get("title", "Untitled")
-                    tag_links = " ".join(f'<a href="{self._abs("/tags/" + slugify(t) + ".html")}">{t}</a>' for t in (meta.get("tags") or []))
+                    tag_links = " ".join(
+                        f'<a href="{self._abs("/tags/" + slugify(t) + ".html")}">{t}</a>'
+                        for t in (meta.get("tags") or [])
+                    )
                     link_path = f"{self.base_url}posts/{slugify(title)}.html"
                     home_post_list += (
                         f'<article class="post-entry"><h2><a href="{link_path}">{title}</a></h2>'
@@ -566,7 +573,9 @@ class Site:
                 date_format = self._config.get("date_format", "%B %Y")
                 date_str = d.strftime(date_format) if d else ""
                 title = meta.get("title", "Untitled")
-                tag_links = " ".join(f'<a href="{self._abs("/tags/" + slugify(t) + ".html")}">{t}</a>' for t in (meta.get("tags") or []))
+                tag_links = " ".join(
+                    f'<a href="{self._abs("/tags/" + slugify(t) + ".html")}">{t}</a>' for t in (meta.get("tags") or [])
+                )
                 link_path = f"{self.base_url}posts/{slugify(title)}.html"
                 home_post_list += (
                     f'<article class="post-entry"><h2><a href="{link_path}">{title}</a></h2>'
@@ -624,7 +633,9 @@ class Site:
                 title = m.get("title", "Untitled")
                 date_format = self._config.get("date_format", "%B %Y")
                 date_str = d.strftime(date_format) if d else ""
-                tag_links = " ".join(f'<a href="{self._abs("/tags/" + slugify(t) + ".html")}">{t}</a>' for t in (m.get("tags") or []))
+                tag_links = " ".join(
+                    f'<a href="{self._abs("/tags/" + slugify(t) + ".html")}">{t}</a>' for t in (m.get("tags") or [])
+                )
                 link_path = f"{self.base_url}posts/{slugify(title)}.html"
                 link_items += (
                     f'<article class="post-entry"><h2><a href="{link_path}">{title}</a></h2>'

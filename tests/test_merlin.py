@@ -583,9 +583,7 @@ class TestNumericalEmbeddingFactory:
         from merlin.embeddings import numerical_embedding
 
         X = array([[1.0], [2.0], [3.0]])
-        emb = numerical_embedding(
-            X, strategy="tree-split", n_estimators=5, n_bins=3, random_state=42
-        )
+        emb = numerical_embedding(X, strategy="tree-split", n_estimators=5, n_bins=3, random_state=42)
         assert emb.shape[0] == 3
 
     def test_invalid_strategy(self):

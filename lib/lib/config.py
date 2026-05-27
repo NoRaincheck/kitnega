@@ -66,7 +66,7 @@ def get_config():
     try:
         with open(_CONFIG_PATH) as f:
             cfg = json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError):
+    except FileNotFoundError, json.JSONDecodeError:
         cfg = dict(_DEFAULTS)
 
     # Normalise old env-var-style keys to new names.

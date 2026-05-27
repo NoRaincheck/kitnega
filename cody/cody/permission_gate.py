@@ -109,7 +109,11 @@ def set_bash_mode(mode):
 def set_bash_allow(prefixes):
     """Set extra allow prefixes in config."""
     cfg = get_config()
-    cfg["bash_allow"] = list(prefixes) if isinstance(prefixes, (list, tuple)) else [p.strip() for p in str(prefixes).split(",") if p.strip()]
+    cfg["bash_allow"] = (
+        list(prefixes)
+        if isinstance(prefixes, (list, tuple))
+        else [p.strip() for p in str(prefixes).split(",") if p.strip()]
+    )
     save_config(cfg)
 
 

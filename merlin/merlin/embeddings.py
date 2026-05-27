@@ -45,9 +45,7 @@ def _quantile_boundaries(x: list[float], n_bins: int) -> list[float]:
     return boundaries
 
 
-def _piecewise_linear_encode(
-    value: float, boundaries: list[float], out: list[float], offset: int
-) -> None:
+def _piecewise_linear_encode(value: float, boundaries: list[float], out: list[float], offset: int) -> None:
     """Encode a single scalar into two adjacent bins via linear interpolation.
 
     If ``value`` falls between ``boundaries[i]`` and ``boundaries[i+1]`` the
@@ -160,9 +158,7 @@ class PiecewiseLinearEncoder:
         return embedding
 
 
-def piecewise_linear_embedding(
-    X, y=None, n_bins: int = 8, random_state=None
-) -> array:
+def piecewise_linear_embedding(X, y=None, n_bins: int = 8, random_state=None) -> array:
     """Convenience function — fit and transform in one call."""
     enc = PiecewiseLinearEncoder(n_bins=n_bins, random_state=random_state)
     return enc.fit_transform(X)
@@ -173,13 +169,12 @@ def piecewise_linear_embedding(
 # ---------------------------------------------------------------------------
 
 
-def _collect_tree_splits(
-    forest_trees: list, n_features: int, rng_seed: Optional[int] = None
-) -> List[List[float]]:
+def _collect_tree_splits(forest_trees: list, n_features: int, rng_seed: Optional[int] = None) -> List[List[float]]:
     """Collect all split thresholds from a fitted forest for each feature."""
     splits_per_feature: List[List[float]] = [[] for _ in range(n_features)]
 
     for tree in forest_trees:
+
         def _walk(node):
             if node is None or node.is_leaf:
                 return
@@ -198,9 +193,7 @@ def _collect_tree_splits(
     return result
 
 
-def _forest_boundaries(
-    splits: list[float], n_bins: int, fallback_min=None, fallback_max=None
-) -> list[float]:
+def _forest_boundaries(splits: list[float], n_bins: int, fallback_min=None, fallback_max=None) -> list[float]:
     """Convert raw split points into a dense set of bin boundaries.
 
     Uses the sorted unique tree-split thresholds as boundaries; if there are
@@ -313,9 +306,7 @@ class PiecewiseLinearForestEncoder:
         self.boundaries_ = []
         for j in range(n_features):
             if raw_splits[j]:
-                self.boundaries_.append(
-                    _forest_boundaries(raw_splits[j], self.n_bins, feat_min[j], feat_max[j])
-                )
+                self.boundaries_.append(_forest_boundaries(raw_splits[j], self.n_bins, feat_min[j], feat_max[j]))
             else:
                 # No splits found — use min/max as a single bin boundary pair
                 self.boundaries_.append([feat_min[j], feat_max[j]])
@@ -423,10 +414,7 @@ def numerical_embedding(
             random_state=random_state,
         )
     else:
-        raise ValueError(
-            f"Unknown strategy {strategy!r}. "
-            "Use 'piecewise-linear' or 'tree-split'."
-        )
+        raise ValueError(f"Unknown strategy {strategy!r}. Use 'piecewise-linear' or 'tree-split'.")
 
     return enc.fit_transform(X)
 
