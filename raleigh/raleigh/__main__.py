@@ -351,7 +351,7 @@ HTML_TEMPLATE = """\
 </head>
 <body>
 <header class="site-header">
-    <a href="/">{site_title}</a>
+    <a href="{base_url}">{site_title}</a>
     <nav class="site-nav">{nav_links}</nav>
 </header>
 <div class="wrapper">
@@ -398,6 +398,7 @@ class Site:
         self.output = Path(output_dir).resolve()
         self._config = self._load_config()
         self.site_title = site_title or self._config.get("site_title", "My Site")
+        self.base_url: str = self._config.get("base_url", "")
 
     def _load_config(self) -> dict:
         config_path = self.source.parent / "config.json"
@@ -405,18 +406,25 @@ class Site:
             return json.loads(config_path.read_text(encoding="utf-8"))
         return {}
 
+    def _abs(self, path: str) -> str:
+        """Prepend base_url to an absolute path."""
+        if not path.startswith("/"):
+            return path
+        return self.base_url + path.lstrip("/")
+
     def _nav_links(self) -> str:
         links = self._config.get("nav", [{"name": "Home", "href": "/"}])
-        return " ".join(f'<a href="{item["href"]}">{item["name"]}</a>' for item in links)
+        return " ".join(f'<a href="{self._abs(item["href"])}">{item["name"]}</a>' for item in links)
 
     def _sidebar_items(self) -> str:
         links = self._config.get("nav", [{"name": "Home", "href": "/"}])
-        return "\n".join(f'<li><a href="{item["href"]}">{item["name"]}</a></li>' for item in links)
+        return "\n".join(f'<li><a href="{self._abs(item["href"])}">{item["name"]}</a></li>' for item in links)
 
     def _format_page(self, title: str, content: str) -> str:
         css_escaped = _CSS.replace("</style>", "<\\/style>")
         return HTML_TEMPLATE.format(
             site_title=self.site_title,
+            base_url=self.base_url,
             title=title,
             css=css_escaped,
             nav_links=self._nav_links(),
@@ -488,8 +496,8 @@ class Site:
             date_format = self._config.get("date_format", "%B %Y")
             date_str = d.strftime(date_format) if d else ""
             title = meta.get("title", "Untitled")
-            tag_links = " ".join(f'<a href="/tags/{slugify(t)}.html">{t}</a>' for t in (meta.get("tags") or []))
-            link_path = f"posts/{slugify(title)}.html"
+            tag_links = " ".join(f'<a href="{self._abs("/tags/" + slugify(t) + ".html")}">{t}</a>' for t in (meta.get("tags") or []))
+            link_path = f"{self.base_url}posts/{slugify(title)}.html"
             post_links += (
                 f'<article class="post-entry"><h2><a href="{link_path}">{title}</a></h2>'
                 + (
@@ -523,8 +531,8 @@ class Site:
                     date_format = self._config.get("date_format", "%B %Y")
                     date_str = d.strftime(date_format) if d else ""
                     title = meta.get("title", "Untitled")
-                    tag_links = " ".join(f'<a href="/tags/{slugify(t)}.html">{t}</a>' for t in (meta.get("tags") or []))
-                    link_path = f"/posts/{slugify(title)}.html"
+                    tag_links = " ".join(f'<a href="{self._abs("/tags/" + slugify(t) + ".html")}">{t}</a>' for t in (meta.get("tags") or []))
+                    link_path = f"{self.base_url}posts/{slugify(title)}.html"
                     home_post_list += (
                         f'<article class="post-entry"><h2><a href="{link_path}">{title}</a></h2>'
                         + (
@@ -537,7 +545,7 @@ class Site:
                 index_html = self._format_page(
                     "Home",
                     (home_post_list or "<p>No posts yet.</p>")
-                    + f'<p style="margin-top:2rem"><a href="/blog.html">View all posts →</a></p>',
+                    + f'<p style="margin-top:2rem"><a href="{self._abs("/blog.html")}">View all posts →</a></p>',
                 )
                 (self.output / "index.html").write_text(index_html, encoding="utf-8")
                 count += 1
@@ -558,8 +566,8 @@ class Site:
                 date_format = self._config.get("date_format", "%B %Y")
                 date_str = d.strftime(date_format) if d else ""
                 title = meta.get("title", "Untitled")
-                tag_links = " ".join(f'<a href="/tags/{slugify(t)}.html">{t}</a>' for t in (meta.get("tags") or []))
-                link_path = f"/posts/{slugify(title)}.html"
+                tag_links = " ".join(f'<a href="{self._abs("/tags/" + slugify(t) + ".html")}">{t}</a>' for t in (meta.get("tags") or []))
+                link_path = f"{self.base_url}posts/{slugify(title)}.html"
                 home_post_list += (
                     f'<article class="post-entry"><h2><a href="{link_path}">{title}</a></h2>'
                     + (
@@ -573,7 +581,7 @@ class Site:
             index_html = self._format_page(
                 "Home",
                 (home_post_list or "<p>No posts yet.</p>")
-                + f'<p style="margin-top:2rem"><a href="{blog_index}">View all posts →</a></p>',
+                + f'<p style="margin-top:2rem"><a href="{self._abs("/" + blog_index)}">View all posts →</a></p>',
             )
             (self.output / "index.html").write_text(index_html, encoding="utf-8")
             count += 1
@@ -586,7 +594,7 @@ class Site:
             d = parse_date(meta.get("date", ""))
             date_str = d.strftime(self._config.get("date_format_full", "%B %d, %Y")) if d else ""
             tags = meta.get("tags", []) or []
-            tag_links = " ".join(f'<a href="/tags/{slugify(t)}.html">{t}</a>' for t in tags)
+            tag_links = " ".join(f'<a href="{self._abs("/tags/" + slugify(t) + ".html")}">{t}</a>' for t in tags)
 
             post_html = self._format_page(
                 title,
@@ -616,8 +624,8 @@ class Site:
                 title = m.get("title", "Untitled")
                 date_format = self._config.get("date_format", "%B %Y")
                 date_str = d.strftime(date_format) if d else ""
-                tag_links = " ".join(f'<a href="/tags/{slugify(t)}.html">{t}</a>' for t in (m.get("tags") or []))
-                link_path = f"/posts/{slugify(title)}.html"
+                tag_links = " ".join(f'<a href="{self._abs("/tags/" + slugify(t) + ".html")}">{t}</a>' for t in (m.get("tags") or []))
+                link_path = f"{self.base_url}posts/{slugify(title)}.html"
                 link_items += (
                     f'<article class="post-entry"><h2><a href="{link_path}">{title}</a></h2>'
                     + (

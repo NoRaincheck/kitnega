@@ -1,4 +1,5 @@
 {
+    "base_url": "/kitnega/",
     "site_title": "kitnega",
     "footer": "Built with Raleigh · stdlib-only Python tooling",
     "nav": [
