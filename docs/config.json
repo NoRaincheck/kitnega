@@ -8,7 +8,8 @@
         {"name": "Duncan", "href": "/duncan/"},
         {"name": "Carly", "href": "/carly/"},
         {"name": "Merlin", "href": "/merlin/"},
-        {"name": "Klaus", "href": "/klaus/"}
+        {"name": "Klaus", "href": "/klaus/"},
+        {"name": "Raleigh", "href": "/raleigh/"}
     ],
     "home": "page"
 }
