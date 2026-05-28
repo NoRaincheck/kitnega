@@ -49,12 +49,12 @@ Focused tests for core behavior and edge cases. Run via `uv run`. Tests live in
 All config is stored in JSON files under `~/.kitnega/` — the directory is
 created on first use. There are no environment variables.
 
-| Path                           | Tool  | Purpose              |
-| ------------------------------ | ----- | -------------------- |
-| `~/.kitnega/config.json`       | Cody/lib | Shared settings (API, model, streaming, bash mode, etc.) |
-| `~/.kitnega/sessions.json`     | Cody  | Session persistence    |
-| `~/.kitnega/klaus.db`          | Klaus | SQLite chat database   |
-| `~/.kitnega/klaus_secret`      | Klaus | HMAC signing secret    |
+| Path                       | Tool     | Purpose                                                  |
+| -------------------------- | -------- | -------------------------------------------------------- |
+| `~/.kitnega/config.json`   | Cody/lib | Shared settings (API, model, streaming, bash mode, etc.) |
+| `~/.kitnega/sessions.json` | Cody     | Session persistence                                      |
+| `~/.kitnega/klaus.db`      | Klaus    | SQLite chat database                                     |
+| `~/.kitnega/klaus_secret`  | Klaus    | HMAC signing secret                                      |
 
 ### `config.json`
 

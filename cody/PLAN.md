@@ -41,8 +41,9 @@ paths exist before processing.
 
 #### 4. Read Guard (`cody/read_guard.py`)
 
-In `_handle_read`: limits to first 30 lines by default (configurable via `read_limit`
-in config). Appends "[TRIMMED: N more lines]" message with grep suggestion.
+In `_handle_read`: limits to first 30 lines by default (configurable via
+`read_limit` in config). Appends "[TRIMMED: N more lines]" message with grep
+suggestion.
 
 ### Phase 2: Control & Safety ✅
 
@@ -60,8 +61,8 @@ Configurable whitelist of allowed bash command prefixes. Three modes:
 - `manual`: prompt user for each blocked command
 
 Whitelist includes git subcommands, npm/pnpm/yarn, pip/cargo/go commands, file
-operations (cp/mv/touch), search tools. Extra prefixes configurable via `bash_allow`
-in config.
+operations (cp/mv/touch), search tools. Extra prefixes configurable via
+`bash_allow` in config.
 
 #### 7. Checkpoint (`cody/checkpoint.py`)
 
@@ -102,12 +103,12 @@ Added small-model-specific guidelines:
 
 Shared JSON config at `~/.kitnega/config.json` with keys:
 
-| Key           | Default | Purpose                          |
-| ------------- | ------- | -------------------------------- |
-| `turn_cap`    | `100`   | Max turns per run                |
-| `bash_mode`   | `auto`  | Permission gate mode             |
-| `bash_allow`  | `[]`    | Extra allow prefixes             |
-| `read_limit`  | `30`    | Default read line limit          |
+| Key          | Default | Purpose                 |
+| ------------ | ------- | ----------------------- |
+| `turn_cap`   | `100`   | Max turns per run       |
+| `bash_mode`  | `auto`  | Permission gate mode    |
+| `bash_allow` | `[]`    | Extra allow prefixes    |
+| `read_limit` | `30`    | Default read line limit |
 
 ---
 

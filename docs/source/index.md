@@ -4,20 +4,21 @@ title: kitnega — Agenti(k) Backwards
 
 # kitnega
 
-> *agenti(k)* backwards — a monorepo of stdlib-only Python tools.
+> _agenti(k)_ backwards — a monorepo of stdlib-only Python tools.
 
-| Package    | Role                                                                                |
-| ---------- | ----------------------------------------------------------------------------------- |
-| [Cody](/kitnega/cody/)   | Agentic coding harness — LLM-powered coding agent                                   |
-| [Duncan](/kitnega/duncan/) | TTRPG procedural oracle — dice-driven random generation                             |
-| [Carly](/kitnega/carly/)  | Procedural map generator — diamond-square + Voronoi                                 |
-| [Merlin](/kitnega/merlin/) | Random-split forests (ExtraTrees, IsolationForest, Mondrian) with built-in TreeSHAP |
-| [Klaus](/kitnega/klaus/)  | Minimal Slack clone — Bottle + htmx + sqlite3 chat server                           |
+| Package                      | Role                                                                                |
+| ---------------------------- | ----------------------------------------------------------------------------------- |
+| [Cody](/kitnega/cody/)       | Agentic coding harness — LLM-powered coding agent                                   |
+| [Duncan](/kitnega/duncan/)   | TTRPG procedural oracle — dice-driven random generation                             |
+| [Carly](/kitnega/carly/)     | Procedural map generator — diamond-square + Voronoi                                 |
+| [Merlin](/kitnega/merlin/)   | Random-split forests (ExtraTrees, IsolationForest, Mondrian) with built-in TreeSHAP |
+| [Klaus](/kitnega/klaus/)     | Minimal Slack clone — Bottle + htmx + sqlite3 chat server                           |
 | [Raleigh](/kitnega/raleigh/) | Static site generator from markdown with front-matter                               |
 
 ## Workspace
 
-This repository uses [uv workspaces](https://docs.astral.sh/uv/concepts/projects/workspaces/).
+This repository uses
+[uv workspaces](https://docs.astral.sh/uv/concepts/projects/workspaces/).
 
 ```bash
 uv sync              # install all workspace members
@@ -33,7 +34,8 @@ uv run ruff check    # lint
 
 ## Configuration
 
-All config is stored in JSON files under `~/.kitnega/` — the directory is created on first use. There are no environment variables.
+All config is stored in JSON files under `~/.kitnega/` — the directory is
+created on first use. There are no environment variables.
 
 ### Shared settings (`config.json`)
 
@@ -56,13 +58,15 @@ Cody and lib read from a single shared config file:
 
 ### Tool-specific files
 
-| Path                           | Tool     | Purpose              |
-| ------------------------------ | -------- | -------------------- |
-| `~/.kitnega/sessions.json`     | Cody     | Session persistence  |
-| `~/.kitnega/klaus.db`          | Klaus    | SQLite chat database |
-| `~/.kitnega/klaus_secret`      | Klaus    | HMAC signing secret  |
+| Path                       | Tool  | Purpose              |
+| -------------------------- | ----- | -------------------- |
+| `~/.kitnega/sessions.json` | Cody  | Session persistence  |
+| `~/.kitnega/klaus.db`      | Klaus | SQLite chat database |
+| `~/.kitnega/klaus_secret`  | Klaus | HMAC signing secret  |
 
 ## Inspired By
 
-- [pnegahdar/nano](https://github.com/pnegahdar/nano) — minimalist agentic coding workflow ideas
-- [badlogic/pi-mono](https://github.com/badlogic/pi-mono) — terminal-focused agent harness design
+- [pnegahdar/nano](https://github.com/pnegahdar/nano) — minimalist agentic
+  coding workflow ideas
+- [badlogic/pi-mono](https://github.com/badlogic/pi-mono) — terminal-focused
+  agent harness design

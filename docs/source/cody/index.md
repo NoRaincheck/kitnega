@@ -62,14 +62,18 @@ All settings live in `~/.kitnega/config.json`:
 ## Features
 
 - **Zero dependencies** — pure Python stdlib (urllib, subprocess, json)
-- **OpenAI-compatible** — works with LM Studio, Ollama, any Responses API endpoint
+- **OpenAI-compatible** — works with LM Studio, Ollama, any Responses API
+  endpoint
 - **SSE streaming** — real-time text output via server-sent events
-- **Parallel tool execution** — runs independent tools concurrently in auto-approve mode
+- **Parallel tool execution** — runs independent tools concurrently in
+  auto-approve mode
 - **.gitignore-aware** — respects project gitignore rules when searching files
-- **Cached context walks** — discovers AGENTS.md/README.md once per session, not every turn
+- **Cached context walks** — discovers AGENTS.md/README.md once per session, not
+  every turn
 - **In-memory session cache** — defers disk writes, avoids redundant I/O
 - **Pipe-able** — `echo "prompt" | cody` for scripting
-- **Human-in-the-loop** — approve each write/edit/bash call, read-only tools skip approval
+- **Human-in-the-loop** — approve each write/edit/bash call, read-only tools
+  skip approval
 - **Session persistence** — continue conversations with `-c` or pick with `-s`
 
 ## Built-in Tools

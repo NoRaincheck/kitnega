@@ -1,15 +1,15 @@
 {
-    "base_url": "/kitnega/",
-    "site_title": "kitnega",
-    "footer": "Built with Raleigh · stdlib-only Python tooling",
-    "nav": [
-        {"name": "Home", "href": "/"},
-        {"name": "Cody", "href": "/cody/"},
-        {"name": "Duncan", "href": "/duncan/"},
-        {"name": "Carly", "href": "/carly/"},
-        {"name": "Merlin", "href": "/merlin/"},
-        {"name": "Klaus", "href": "/klaus/"},
-        {"name": "Raleigh", "href": "/raleigh/"}
-    ],
-    "home": "page"
+  "base_url": "/kitnega/",
+  "site_title": "kitnega",
+  "footer": "Built with Raleigh · stdlib-only Python tooling",
+  "nav": [
+    { "name": "Home", "href": "/" },
+    { "name": "Cody", "href": "/cody/" },
+    { "name": "Duncan", "href": "/duncan/" },
+    { "name": "Carly", "href": "/carly/" },
+    { "name": "Merlin", "href": "/merlin/" },
+    { "name": "Klaus", "href": "/klaus/" },
+    { "name": "Raleigh", "href": "/raleigh/" }
+  ],
+  "home": "page"
 }

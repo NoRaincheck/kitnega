@@ -47,30 +47,30 @@ Place a `config.json` alongside the source directory for site-wide settings:
 
 ```json
 {
-    "site_title": "My Site",
-    "footer": "Built with Raleigh",
-    "nav": [{"name": "Home", "href": "/"}],
-    "home": "recent",
-    "blog_index": "blog.html",
-    "date_format": "%B %Y",
-    "date_format_full": "%B %d, %Y"
+  "site_title": "My Site",
+  "footer": "Built with Raleigh",
+  "nav": [{ "name": "Home", "href": "/" }],
+  "home": "recent",
+  "blog_index": "blog.html",
+  "date_format": "%B %Y",
+  "date_format_full": "%B %d, %Y"
 }
 ```
 
-| Key              | Default        | Description                              |
-| ---------------- | -------------- | ---------------------------------------- |
-| `site_title`     | _(none)_       | Site title used in HTML head             |
-| `footer`         | _(none)_       | Footer text rendered on every page       |
-| `nav`            | `[]`           | Navigation bar entries (name + href)     |
-| `home`           | `"recent"`     | Homepage mode: `"page"`, `"blog"`, or `"recent"` |
-| `blog_index`     | `"blog.html"`  | Blog listing page filename               |
-| `date_format`    | `%B %Y`        | Short date format (e.g., "May 2026")     |
-| `date_format_full` | `%B %d, %Y`  | Full date format (e.g., "May 27, 2026")  |
+| Key                | Default       | Description                                      |
+| ------------------ | ------------- | ------------------------------------------------ |
+| `site_title`       | _(none)_      | Site title used in HTML head                     |
+| `footer`           | _(none)_      | Footer text rendered on every page               |
+| `nav`              | `[]`          | Navigation bar entries (name + href)             |
+| `home`             | `"recent"`    | Homepage mode: `"page"`, `"blog"`, or `"recent"` |
+| `blog_index`       | `"blog.html"` | Blog listing page filename                       |
+| `date_format`      | `%B %Y`       | Short date format (e.g., "May 2026")             |
+| `date_format_full` | `%B %d, %Y`   | Full date format (e.g., "May 27, 2026")          |
 
 ## CLI Options
 
-| Flag              | Default    | Description                           |
-| ----------------- | ---------- | ------------------------------------- |
-| `source`          | `source/`  | Input directory                       |
-| `-o, --output`    | `_site/`   | Output directory                      |
-| `--title`         | _(none)_   | Override site title from config.json  |
+| Flag           | Default   | Description                          |
+| -------------- | --------- | ------------------------------------ |
+| `source`       | `source/` | Input directory                      |
+| `-o, --output` | `_site/`  | Output directory                     |
+| `--title`      | _(none)_  | Override site title from config.json |

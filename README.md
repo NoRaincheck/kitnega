@@ -156,6 +156,7 @@ uv run raleigh --title "My Blog"       # override site title
 ```
 
 Directory layout:
+
 ```
 source/
   index.md                  Homepage

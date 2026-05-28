@@ -4,7 +4,9 @@ title: Klaus — Minimal Slack Clone
 
 # Klaus
 
-Minimal Slack clone — a chat server with rooms, DMs, and htmx-driven UI. Built with `lib.bottle` (Bottle web framework from `lib/`), sqlite3, and htmx. Zero JS framework dependencies — just htmx for partial page swaps.
+Minimal Slack clone — a chat server with rooms, DMs, and htmx-driven UI. Built
+with `lib.bottle` (Bottle web framework from `lib/`), sqlite3, and htmx. Zero JS
+framework dependencies — just htmx for partial page swaps.
 
 ## Quick Start
 
@@ -19,7 +21,8 @@ uv run klaus create-admin admin -p test123
 uv run klaus serve
 ```
 
-Open `http://127.0.0.1:8080` in your browser. Register a new user from the login page, or sign in with the admin account.
+Open `http://127.0.0.1:8080` in your browser. Register a new user from the login
+page, or sign in with the admin account.
 
 ## CLI
 
@@ -40,7 +43,9 @@ Commands:
     --force                  Overwrite existing database
 ```
 
-The database and secret file default to `~/.kitnega/klaus.db` and `~/.kitnega/klaus_secret`. Override with `--db` and `--secret-file` on any command.
+The database and secret file default to `~/.kitnega/klaus.db` and
+`~/.kitnega/klaus_secret`. Override with `--db` and `--secret-file` on any
+command.
 
 ## Creating an Admin
 
@@ -71,11 +76,14 @@ Admins can toggle private rooms to public (one-way). Regular members cannot.
 
 ### Direct Messages
 
-Type `@<username> <message>` in any room's message input to send a DM. A private room is created automatically between you and the target user. Future messages to the same person reuse the same room.
+Type `@<username> <message>` in any room's message input to send a DM. A private
+room is created automatically between you and the target user. Future messages
+to the same person reuse the same room.
 
 ### Search
 
-Messages are indexed with FTS5. Search via `search_messages()` in the DB layer (not yet exposed via UI — extend as needed).
+Messages are indexed with FTS5. Search via `search_messages()` in the DB layer
+(not yet exposed via UI — extend as needed).
 
 ## Database Schema
 
@@ -87,7 +95,8 @@ messages     — id, room_id, user_id, content, created_at
 messages_fts — FTS5 index on messages.content
 ```
 
-Passwords are hashed with PBKDF2-HMAC-SHA256 (100k iterations, random 16-byte salt per user).
+Passwords are hashed with PBKDF2-HMAC-SHA256 (100k iterations, random 16-byte
+salt per user).
 
 ## Architecture
 
@@ -103,16 +112,21 @@ Browser ──htmx──►  │  Bottle (WSGI)   │
                    └──────────────────┘
 ```
 
-Auth is handled via signed cookies (`user_id` stored in cookie, verified with HMAC-SHA256 using the secret from `~/.kitnega/klaus_secret`).
+Auth is handled via signed cookies (`user_id` stored in cookie, verified with
+HMAC-SHA256 using the secret from `~/.kitnega/klaus_secret`).
 
 ## Project Layout
 
-`klaus/` is a `uv` workspace member. The server code lives in `klaus/klaus/`: `__main__.py` (CLI), `app.py` (Bottle routes), `db.py` (SQLite layer), and a `views/` directory of htmx templates.
+`klaus/` is a `uv` workspace member. The server code lives in `klaus/klaus/`:
+`__main__.py` (CLI), `app.py` (Bottle routes), `db.py` (SQLite layer), and a
+`views/` directory of htmx templates.
 
 ## Known Issues
 
-- **Leave room is non-functional** — the `/rooms/<id>/leave` endpoint exists but does not work correctly. Requires investigation.
-- **Room ordering** — there is no way to reorder or hide rooms and DMs in the sidebar. Rooms are sorted by most recent message, which can be noisy.
+- **Leave room is non-functional** — the `/rooms/<id>/leave` endpoint exists but
+  does not work correctly. Requires investigation.
+- **Room ordering** — there is no way to reorder or hide rooms and DMs in the
+  sidebar. Rooms are sorted by most recent message, which can be noisy.
 
 ## Tests
 
@@ -120,4 +134,5 @@ Auth is handled via signed cookies (`user_id` stored in cookie, verified with HM
 uv run pytest tests/test_klaus.py -v
 ```
 
-Tests cover the database layer (user auth, room CRUD, messages, access control) and app-layer integration (routes, auth flow, cookie handling).
+Tests cover the database layer (user auth, room CRUD, messages, access control)
+and app-layer integration (routes, auth flow, cookie handling).

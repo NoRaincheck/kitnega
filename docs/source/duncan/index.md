@@ -4,7 +4,10 @@ title: Duncan — TTRPG Procedural Oracle
 
 # Duncan
 
-A minimal Python agent that acts as a dungeon master oracle for tabletop RPGs. Duncan does not tell stories or run campaigns — it _generates content_: NPCs, events, locations, factions, and encounters via procedural (code-based) weighted tables and seeded randomness.
+A minimal Python agent that acts as a dungeon master oracle for tabletop RPGs.
+Duncan does not tell stories or run campaigns — it _generates content_: NPCs,
+events, locations, factions, and encounters via procedural (code-based) weighted
+tables and seeded randomness.
 
 This makes it **FAIR**: transparent, reproducible, and free of LLM bias.
 
@@ -30,7 +33,8 @@ duncan location "abandoned mine"     # location generation
 
 ## Saved Results (`.oracle`) Files
 
-Append `--output .oracle` or pipe to save a `.oracle` file for replay and shareability:
+Append `--output .oracle` or pipe to save a `.oracle` file for replay and
+shareability:
 
 ```bash
 duncan npc > session-01.oracle
@@ -41,7 +45,8 @@ duncan event >> session-01.oracle
 
 ## Seeded Randomness
 
-Pass `--seed` (string or number) for deterministic output. Same seed always produces the same result, making rolls verifiable at the table.
+Pass `--seed` (string or number) for deterministic output. Same seed always
+produces the same result, making rolls verifiable at the table.
 
 ```bash
 duncan npc --seed "session-3"
@@ -51,7 +56,8 @@ Without `--seed`, each run picks a fresh random seed.
 
 ## Intent Detection
 
-When no subcommand is given, Duncan scans the description for keywords to infer the oracle type automatically:
+When no subcommand is given, Duncan scans the description for keywords to infer
+the oracle type automatically:
 
 ```bash
 duncan "a shady merchant in a tavern"   → npc  (merchant, tavern)
@@ -59,7 +65,8 @@ duncan "an ancient order hiding secrets" → faction (order)
 duncan "what lurks in the dark forest"  → location (forest)
 ```
 
-If no keywords match, it defaults to `event`. Use an explicit subcommand to override.
+If no keywords match, it defaults to `event`. Use an explicit subcommand to
+override.
 
 ## Dice Expressions
 
