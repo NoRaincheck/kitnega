@@ -29,6 +29,81 @@ Key components:
     md_to_html          — Convert markdown text to HTML (no external deps)
     Site                — Generator class orchestrating build, pages, posts, tags
     main                — CLI entry point
+
+Markdown parsing:
+
+    ``md_to_html`` uses a two-phase approach.  Block parsing (the main loop)
+    groups lines separated by blank lines and classifies each group as a
+    heading, code fence, blockquote, list, table, horizontal rule, or
+    paragraph.  For headings, code blocks, blockquotes, lists, and tables
+    the block is emitted immediately.  Plain text groups are buffered into
+    paragraphs and then run through ``_inline()``.
+
+    ``_inline()`` applies regex substitutions for inline elements (ordered
+    carefully so raw ``*`` in ``**bold**`` doesn't match as emphasis):
+
+    ===================  ========================================
+    Markdown             HTML
+    ===================  ========================================
+    ``**bold**``         ``<strong>bold</strong>``
+    ``*italic*``         ``<em>italic</em>``
+    ``_italic_``         ``<em>italic</em>``
+    ```code``          ``<code>code</code>``
+    ``[text](url)``      ``<a href="url">text</a>``
+    ``![alt](src)``      ``<img src="src" alt="alt">``
+    ===================  ========================================
+
+    Limitation — the parser is *intentionally* minimal and does NOT
+    handle:
+
+    * Nested emphasis (``***bold italic***``)
+    * Strikethrough (``~~text~~``)
+    * Task lists (``- [ ] todo``)
+    * Definition lists
+    * GFM autolinks / footnotes / emoji
+    * Table alignment or rowspan / colspan
+    * HTML block passthrough
+    * Link / image titles (``[t](u "title")``)
+
+    Replicated mini parser (standalone, no front-matter)::
+
+        import re
+
+        def _inline(text: str) -> str:
+            text = re.sub(r"!\\[([^\\]]*)\\]\\(([^)]+)\\"", r'<img src="\\2" alt="\\1">', text)
+            text = re.sub(r"\\*\\*(.+?)\\*\\*", r"<strong>\\1</strong>", text)
+            text = re.sub(r"(?<!\\*)\\*(?!\\*)(.+?)(?<!\\*)\\*(?!\\*)", r"<em>\\1</em>", text)
+            text = re.sub(r"`([^`]+)`", r"<code>\\1</code>", text)
+            text = re.sub(r"\\[([^\\]]+)\\]\\(([^)]+)\\"", r'<a href="\\2">\\1</a>', text)
+            return text
+
+        def md_to_html(md_text: str) -> str:
+            lines = md_text.splitlines()
+            html, i, n = [], 0, len(lines)
+
+            def _flush(block):
+                if block:
+                    html.append(f"<p>{_inline(' '.join(block))}</p>")
+
+            block = []
+            while i < n:
+                line = lines[i]
+                if not line.strip():
+                    _flush(block); block = []; i += 1; continue
+                hm = re.match(r"^(#{1,6})\\s+(.*)", line)
+                if hm:
+                    _flush(block); block = []
+                    html.append(f"<h{len(hm.group(1))}>{_inline(hm.group(2))}</h{len(hm.group(1))}>")
+                    i += 1; continue
+                if re.match(r"^```", line):
+                    _flush(block); block = []; code = []; i += 1
+                    while i < n and not lines[i].strip().startswith("```"):
+                        code.append(lines[i]); i += 1
+                    html.append(f"<pre><code>{chr(10).join(code)}\\n</code></pre>")
+                    i += 1; continue
+                block.append(line); i += 1
+            _flush(block)
+            return "\\n".join(html)
 """
 
 from __future__ import annotations
