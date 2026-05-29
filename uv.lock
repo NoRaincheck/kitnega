@@ -123,6 +123,7 @@ dependencies = [
 dev = [
     { name = "onnx" },
     { name = "onnxruntime" },
+    { name = "pktpy" },
     { name = "pytest" },
     { name = "ruff" },
     { name = "ty" },
@@ -143,6 +144,7 @@ requires-dist = [
 dev = [
     { name = "onnx", specifier = ">=1.21.0" },
     { name = "onnxruntime", specifier = ">=1.26.0" },
+    { name = "pktpy", git = "https://github.com/NoRaincheck/pktpy.git" },
     { name = "pytest", specifier = ">=9.0.3" },
     { name = "ruff", specifier = ">=0.15.13" },
     { name = "ty", specifier = ">=0.0.37" },
@@ -278,6 +280,11 @@ sdist = { url = "https://files.pythonhosted.org/packages/d7/f1/e7a6dd94a8d4a5626
 wheels = [
     { url = "https://files.pythonhosted.org/packages/df/b2/87e62e8c3e2f4b32e5fe99e0b86d576da1312593b39f47d8ceef365e95ed/packaging-26.2-py3-none-any.whl", hash = "sha256:5fc45236b9446107ff2415ce77c807cee2862cb6fac22b8a73826d0693b0980e", size = 100195, upload-time = "2026-04-24T20:15:22.081Z" },
 ]
+
+[[package]]
+name = "pktpy"
+version = "0.1.0"
+source = { git = "https://github.com/NoRaincheck/pktpy.git#29604512b54a8040919e1c0a305a084dbbbbec6d" }
 
 [[package]]
 name = "pluggy"

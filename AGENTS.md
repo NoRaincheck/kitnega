@@ -21,6 +21,11 @@ possible.
 - `uv run raleigh` — build static site from markdown source
 - `uv run pytest` — run tests
 - `uv run ruff check` — lint
+- `python scripts/rollup.py --source-dir duncan/duncan --output out.py` —
+  consolidate a module into a single pktpy-compatible script
+- `python scripts/rollup.py --source-dir duncan/duncan --output out.py --strip-prefix TN. --strip-prefix TA.`
+  — with namespace prefix stripping
+- `uv run pktpy out.py` — run a consolidated script via pocketpy
 
 ## Change discipline
 
@@ -43,6 +48,58 @@ code while working on a task — that can wait.
 
 Focused tests for core behavior and edge cases. Run via `uv run`. Tests live in
 `tests/` under the member package or workspace root.
+
+## pktpy compatibility
+
+[pocketpy](https://github.com/pocketpy/pocketpy) (via `uv run pktpy`) is a
+portable Python subset. The consolidated output of `scripts/rollup.py` targets
+this runtime. Source packages stay CPython-only; all transforms happen at rollup
+time.
+
+### Unavailable stdlib modules (pktpy)
+
+Only ~25 modules are available. Major omissions: `re`, `pathlib`, `itertools`,
+`argparse`, `hashlib`, `subprocess`, `threading`, `glob`, `shutil`, `copy`,
+`types`, `struct`, `ctypes`, `urllib`, `socket`, `sqlite3`.
+
+Available: `random`, `math`, `json`, `os` (limited), `sys` (limited), `time`,
+`collections`, `datetime`, `functools`, `enum`.
+
+### Syntax limitations
+
+- No generator expressions `(x for x in y)` — use list comprehensions
+  `[x for x in y]` instead
+- No `try/except else/finally` (only bare try/except)
+- No `__del__`, `__slots__`, `__iadd__` / `__imul__` (in-place magic)
+- No `a, *b, c = x` star unpacking (only `a, *b = x`)
+- No multiple inheritance
+
+### Rollup transforms
+
+`scripts/rollup.py` applies these to the output:
+
+| Source issue                                 | Transform                                            |
+| -------------------------------------------- | ---------------------------------------------------- |
+| `import hashlib`                             | Replaced with `_hash_str()` (simple polynomial hash) |
+| `import argparse`                            | Replaced with manual `sys.argv` parsing              |
+| `from lib.llm` / relative imports            | Stripped (feature not available under pktpy)         |
+| Generator expressions                        | Converted to list comprehensions                     |
+| `sys.stdout.write()`                         | Replace with `print()`                               |
+| `def main()` and `if __name__ == "__main__"` | Stripped (avoids need for argparse conversion)       |
+
+### Graceful fallback pattern
+
+When code must conditionally use unavailable stdlib, prefer:
+
+```python
+try:
+    from some_module import thing
+except ImportError:
+    thing = None
+```
+
+This is transparent under CPython (no behavior change) and degrades gracefully
+under pktpy.
 
 ## Configuration
 

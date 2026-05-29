@@ -16,11 +16,13 @@ klaus = { workspace = true }
 lib = { workspace = true }
 merlin = { workspace = true }
 raleigh = { workspace = true }
+pktpy = { git = "https://github.com/NoRaincheck/pktpy.git" }
 
 [dependency-groups]
 dev = [
     "onnx>=1.21.0",
     "onnxruntime>=1.26.0",
+    "pktpy",
     "pytest>=9.0.3",
     "ruff>=0.15.13",
     "ty>=0.0.37",
