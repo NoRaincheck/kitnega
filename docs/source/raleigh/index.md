@@ -67,6 +67,36 @@ Place a `config.json` alongside the source directory for site-wide settings:
 | `date_format`      | `%B %Y`       | Short date format (e.g., "May 2026")             |
 | `date_format_full` | `%B %d, %Y`   | Full date format (e.g., "May 27, 2026")          |
 
+## Markdown → HTML
+
+Raleigh's markdown parser uses a two-phase approach:
+
+1. **Block parsing** — lines grouped by blank lines are classified as headings,
+   code fences, blockquotes, lists, tables, horizontal rules, or paragraphs.
+2. **Inline processing** — regex substitutions for inline elements:
+
+| Markdown      | HTML                        |
+| ------------- | --------------------------- |
+| `**bold**`    | `<strong>bold</strong>`     |
+| `*italic*`    | `<em>italic</em>`           |
+| `_italic_`    | `<em>italic</em>`           |
+| `` `code` ``  | `<code>code</code>`         |
+| `[text](url)` | `<a href="url">text</a>`    |
+| `![alt](src)` | `<img src="src" alt="alt">` |
+
+### Known limitations
+
+The parser is intentionally minimal and does **not** handle:
+
+- Nested emphasis (`***bold italic***`)
+- Strikethrough (`~~text~~`)
+- Task lists (`- [ ] todo`)
+- Definition lists
+- GFM autolinks / footnotes / emoji
+- Table alignment or rowspan / colspan
+- HTML block passthrough
+- Link / image titles (`[t](u "title")`)
+
 ## CLI Options
 
 | Flag           | Default   | Description                          |
