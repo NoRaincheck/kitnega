@@ -22,11 +22,12 @@ pktpy = { git = "https://github.com/NoRaincheck/pktpy.git" }
 dev = [
     "onnx>=1.21.0",
     "onnxruntime>=1.26.0",
-    "pktpy",
     "pytest>=9.0.3",
     "ruff>=0.15.13",
     "ty>=0.0.37",
 ]
+
+pktpy = ["pktpy"]
 
 [tool.ruff]
 line-length = 120

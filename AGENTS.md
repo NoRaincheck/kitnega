@@ -25,6 +25,7 @@ possible.
   consolidate a module into a single pktpy-compatible script
 - `python scripts/rollup.py --source-dir duncan/duncan --output out.py --strip-prefix TN. --strip-prefix TA.`
   — with namespace prefix stripping
+- `uv sync --group pktpy` — install optional pktpy runtime
 - `uv run pktpy out.py` — run a consolidated script via pocketpy
 
 ## Change discipline
