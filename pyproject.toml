@@ -3,15 +3,16 @@ name = "kitnega"
 version = "0.1.0"
 description = "Minimal Python workspace for agent tools"
 requires-python = ">=3.14"
-dependencies = ["carly", "cody", "duncan", "klaus", "lib", "merlin", "raleigh"]
+dependencies = ["carly", "cody", "duncan", "kenneth", "klaus", "lib", "merlin", "raleigh"]
 
 [tool.uv.workspace]
-members = ["carly", "cody", "duncan", "klaus", "lib", "merlin", "raleigh"]
+members = ["carly", "cody", "duncan", "kenneth", "klaus", "lib", "merlin", "raleigh"]
 
 [tool.uv.sources]
 carly = { workspace = true }
 cody = { workspace = true }
 duncan = { workspace = true }
+kenneth = { workspace = true }
 klaus = { workspace = true }
 lib = { workspace = true }
 merlin = { workspace = true }
@@ -20,10 +21,12 @@ pktpy = { git = "https://github.com/NoRaincheck/pktpy.git" }
 
 [dependency-groups]
 dev = [
+    "nltk>=3.9.4",
     "onnx>=1.21.0",
     "onnxruntime>=1.26.0",
     "pytest>=9.0.3",
     "ruff>=0.15.13",
+    "torch>=2.12.0",
     "ty>=0.0.37",
 ]
 
