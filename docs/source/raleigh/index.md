@@ -41,6 +41,12 @@ Post body goes here.
 
 Keys are parsed as JSON values when possible; otherwise treated as strings.
 
+### Post Navigation
+
+Per-post pages include prev/next navigation links sorted by date (newest →
+oldest). The first and last posts show disabled links for previous and next
+respectively.
+
 ## Config (`config.json`)
 
 Place a `config.json` alongside the source directory for site-wide settings:
@@ -57,15 +63,16 @@ Place a `config.json` alongside the source directory for site-wide settings:
 }
 ```
 
-| Key                | Default       | Description                                      |
-| ------------------ | ------------- | ------------------------------------------------ |
-| `site_title`       | _(none)_      | Site title used in HTML head                     |
-| `footer`           | _(none)_      | Footer text rendered on every page               |
-| `nav`              | `[]`          | Navigation bar entries (name + href)             |
-| `home`             | `"recent"`    | Homepage mode: `"page"`, `"blog"`, or `"recent"` |
-| `blog_index`       | `"blog.html"` | Blog listing page filename                       |
-| `date_format`      | `%B %Y`       | Short date format (e.g., "May 2026")             |
-| `date_format_full` | `%B %d, %Y`   | Full date format (e.g., "May 27, 2026")          |
+| Key                | Default       | Description                                        |
+| ------------------ | ------------- | -------------------------------------------------- |
+| `site_title`       | _(none)_      | Site title used in HTML head                       |
+| `base_url`         | `""`          | URL prefix for subpath deployments (e.g. `/blog/`) |
+| `footer`           | _(none)_      | Footer text rendered on every page                 |
+| `nav`              | `[]`          | Navigation bar entries (name + href)               |
+| `home`             | `"recent"`    | Homepage mode: `"page"`, `"blog"`, or `"recent"`   |
+| `blog_index`       | `"blog.html"` | Blog listing page filename                         |
+| `date_format`      | `%B %Y`       | Short date format (e.g., "May 2026")               |
+| `date_format_full` | `%B %d, %Y`   | Full date format (e.g., "May 27, 2026")            |
 
 ## Markdown → HTML
 

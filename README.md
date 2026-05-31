@@ -10,6 +10,7 @@ A monorepo with stdlib-only packages for different domains:
 | `duncan`  | TTRPG procedural oracle — dice-driven random generation                             |
 | `carly`   | Procedural map generator — diamond-square + Voronoi                                 |
 | `merlin`  | Random-split forests (ExtraTrees, IsolationForest, Mondrian) with built-in TreeSHAP |
+| `kenneth` | Kneser-Ney language model with NLTK alignment, PyTorch/ONNX export                  |
 | `klaus`   | Minimal Slack clone — Bottle + htmx + sqlite3 chat server                           |
 | `raleigh` | Static site generator from markdown with front-matter                               |
 | `lib`     | Shared utilities — vendored modules used across packages                            |
@@ -128,6 +129,20 @@ See [merlin/README.md](merlin/README.md) for full docs.
 
 ```bash
 uv run merlin --help
+```
+
+## kenneth
+
+Interpolated Kneser-Ney language model with pure-Python training,
+NLTK-compatible scoring, and optional PyTorch/ONNX export.
+
+```python
+from kenneth.model import KneserNeyModel
+
+model = KneserNeyModel(order=3)
+model.fit([["the", "cat", "sat"], ["the", "dog", "ran"]])
+model.score("cat")  # log probability
+model.perplexity("the cat sat".split())
 ```
 
 ## klaus

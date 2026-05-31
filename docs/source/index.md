@@ -12,6 +12,7 @@ title: kitnega — Agenti(k) Backwards
 | [Duncan](/kitnega/duncan/)   | TTRPG procedural oracle — dice-driven random generation                             |
 | [Carly](/kitnega/carly/)     | Procedural map generator — diamond-square + Voronoi                                 |
 | [Merlin](/kitnega/merlin/)   | Random-split forests (ExtraTrees, IsolationForest, Mondrian) with built-in TreeSHAP |
+| [Kenneth](/kitnega/kenneth/) | Kneser-Ney language model with NLTK alignment, PyTorch/ONNX export                  |
 | [Klaus](/kitnega/klaus/)     | Minimal Slack clone — Bottle + htmx + sqlite3 chat server                           |
 | [Raleigh](/kitnega/raleigh/) | Static site generator from markdown with front-matter                               |
 
