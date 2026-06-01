@@ -9,4 +9,5 @@ hooks = [
   { id = "deno-fmt", name = "deno fmt", entry = "deno fmt", language = "system", types = [
     "markdown",
   ] },
+  { id = "pytest", name = "pytest", entry = "uv run pytest tests/", language = "system", pass_filenames = false },
 ]
