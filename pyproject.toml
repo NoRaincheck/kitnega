@@ -25,6 +25,7 @@ dev = [
     "onnx>=1.21.0",
     "onnxruntime>=1.26.0",
     "pytest>=9.0.3",
+    "pytest-playwright>=0.8.0",
     "ruff>=0.15.13",
     "torch>=2.12.0",
     "ty>=0.0.37",

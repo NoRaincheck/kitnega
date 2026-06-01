@@ -1,4 +1,5 @@
-% for u in users: % if u["id"] != current_user["id"]:
+% for u in users:
+% if u["id"] != current_user["id"]:
 <div style="padding: 4px 0">
   <a
     href="#"
@@ -11,4 +12,5 @@
     u["display_name"] != u["username"] else ""}}
   </a>
 </div>
-% end % end
+% end
+% end

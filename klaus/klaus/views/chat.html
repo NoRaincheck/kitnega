@@ -40,13 +40,12 @@ return false"
     <div class="chat-header">
       <div>
         <h2>
-          {{active_room.get("title") or active_room["name"]}} % if not
-          active_room["is_public"]:
+          {{active_room.get("title") or active_room["name"]}}
+          % if not active_room["is_public"]:
           <span class="tag tag-private">DM</span>
           % end
         </h2>
-        % if active_room.get("topic") and not
-        active_room["name"].startswith("_dm_"):
+        % if active_room.get("topic") and not active_room["name"].startswith("_dm_"):
         <div class="topic">{{active_room["topic"]}}</div>
         % end
       </div>
@@ -83,8 +82,7 @@ return false"
       hx-swap="innerHTML"
       hx-target="#messages"
     >
-      % include("_messages", messages=messages, active_room=active_room,
-      user=user, render_content=render_content)
+      % include("_messages", messages=messages, active_room=active_room, user=user, render_content=render_content)
     </div>
     <div class="chat-input">
       <form
