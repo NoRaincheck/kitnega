@@ -14,6 +14,7 @@ title: kitnega — Agenti(k) Backwards
 | [Merlin](/kitnega/merlin/)   | Random-split forests (ExtraTrees, IsolationForest, Mondrian) with built-in TreeSHAP |
 | [Kenneth](/kitnega/kenneth/) | Kneser-Ney language model with NLTK alignment, PyTorch/ONNX export                  |
 | [Klaus](/kitnega/klaus/)     | Minimal Slack clone — Bottle + htmx + sqlite3 chat server                           |
+| [Pixie](/kitnega/pixie/)     | 1-bit spritesheet renderer — pixel UI text, borders, and icons                      |
 | [Raleigh](/kitnega/raleigh/) | Static site generator from markdown with front-matter                               |
 
 ## Workspace
@@ -29,6 +30,7 @@ uv run carly <args>  # run the map generator
 uv run merlin <cmd>  # run ML experiments
 uv run klaus <cmd>   # run the chat server (serve, init-db, create-admin)
 uv run raleigh       # build static site from markdown source
+uv run python pixie/example.py  # generate pixie sample PNGs
 uv run pytest        # run tests
 uv run ruff check    # lint
 ```
