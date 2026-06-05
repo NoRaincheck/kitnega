@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pixie"
+version = "0.1.0"
+description = "1-bit spritesheet renderer for pixel UI elements"
+requires-python = ">=3.14"
+dependencies = []
+
+[tool.setuptools.packages.find]
+include = ["pixelui*"]
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I001"]

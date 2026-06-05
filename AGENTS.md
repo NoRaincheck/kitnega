@@ -2,10 +2,10 @@
 
 ## Project
 
-`uv`-managed Python workspace with eight member packages: `cody` (`cody/`),
+`uv`-managed Python workspace with nine member packages: `cody` (`cody/`),
 `duncan` (`duncan/`), `carly` (`carly/`), `merlin` (`merlin/`), `kenneth`
-(`kenneth/`), `klaus` (`klaus/`), `raleigh` (`raleigh/`), and `lib` (`lib/`). At
-their core, all packages use only Python stdlib.
+(`kenneth/`), `klaus` (`klaus/`), `pixie` (`pixie/`), `raleigh` (`raleigh/`),
+and `lib` (`lib/`). At their core, all packages use only Python stdlib.
 
 `lib` contains single-file modules that may be vendored. Avoid modifying where
 possible.
@@ -20,6 +20,7 @@ possible.
 - `uv run klaus <cmd>` — run the chat server (serve, init-db, create-admin)
 - `uv run raleigh` — build static site from markdown source
 - `uv run pytest` — run tests
+- `uv run pytest pixie/tests/` — run pixie tests specifically
 - `uv run ruff check` — lint
 - `python scripts/rollup.py --source-dir duncan/duncan --output out.py` —
   consolidate a module into a single pktpy-compatible script

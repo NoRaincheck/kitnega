@@ -12,6 +12,7 @@ A monorepo with stdlib-only packages for different domains:
 | `merlin`  | Random-split forests (ExtraTrees, IsolationForest, Mondrian) with built-in TreeSHAP |
 | `kenneth` | Kneser-Ney language model with NLTK alignment, PyTorch/ONNX export                  |
 | `klaus`   | Minimal Slack clone — Bottle + htmx + sqlite3 chat server                           |
+| `pixie`   | 1-bit spritesheet renderer — text, borders, panels, UI elements as PNG spritesheets |
 | `raleigh` | Static site generator from markdown with front-matter                               |
 | `lib`     | Shared utilities — vendored modules used across packages                            |
 
@@ -159,6 +160,17 @@ uv run klaus create-admin     # create an admin user
 uv run klaus serve             # start the server on http://127.0.0.1:8080
 ```
 
+## pixie
+
+A 1-bit spritesheet renderer — renders text, bordered boxes, panels, and UI
+elements as PNG spritesheets. Includes an 8x16 pixel font (Spleen) and a set of
+8x8 UI element primitives.
+
+```bash
+uv run pytest pixie/tests/          # run pixie tests
+uv run python pixie/example.py     # generate example spritesheets
+```
+
 ## raleigh
 
 A minimal static site generator from markdown with front-matter. Pure Python
@@ -194,6 +206,7 @@ uv run merlin <cmd>  # run ML experiments
 uv run klaus <cmd>   # run the chat server (serve, init-db, create-admin)
 uv run raleigh       # build static site from markdown source
 uv run pytest        # run tests
+uv run python pixie/example.py  # generate pixie example spritesheets
 uv run ruff check    # lint
 ```
 
