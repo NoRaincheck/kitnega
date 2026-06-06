@@ -12,8 +12,8 @@ class TestReadGuard:
         assert trim_result(short, "foo.txt") == short  # no trimming needed
 
     def test_trim_long_result(self):
-        from lib.config import save_config, reload_config
         from cody.read_guard import MAX_LINES, trim_result
+        from lib.config import reload_config, save_config
 
         cfg = {"read_limit": 30}
         save_config(cfg)
@@ -177,17 +177,16 @@ class TestQualityMonitor:
 
 class TestTurnCap:
     def test_default_cap(self):
-        from lib.config import save_config
         from cody.turn_cap import get_turn_cap
+        from lib.config import save_config
 
         cfg = {"turn_cap": 100}
         save_config(cfg)
         assert get_turn_cap() == 100
 
     def test_custom_cap(self):
-        import importlib
 
-        from lib.config import save_config, reload_config
+        from lib.config import reload_config, save_config
 
         cfg = {"turn_cap": 50}
         save_config(cfg)
@@ -221,8 +220,8 @@ class TestPermissionGate:
         assert result is None
 
     def test_blocked_dangerous_command(self):
-        from lib.config import save_config, reload_config
         from cody.permission_gate import gate_command
+        from lib.config import reload_config, save_config
 
         cfg = {"bash_mode": "auto"}
         save_config(cfg)
@@ -239,8 +238,8 @@ class TestPermissionGate:
         assert result is None
 
     def test_accept_all_mode(self):
-        from lib.config import save_config, reload_config
         from cody.permission_gate import gate_command
+        from lib.config import reload_config, save_config
 
         cfg = {"bash_mode": "accept-all"}
         save_config(cfg)

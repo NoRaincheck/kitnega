@@ -1,7 +1,6 @@
 import os
 
 import pytest
-
 from lib.config import reload_config
 
 
