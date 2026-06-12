@@ -24,6 +24,13 @@ def main():
     print(f"  {MondrianForestClassifier.__name__}")
     print(f"  {MondrianForestRegressor.__name__}")
     print()
+    print("Histogram gradient boosting:")
+    from merlin.histogram import HistogramGradientBoosting
+
+    print(f"  {HistogramGradientBoosting.__name__}(task=…, bin_strategy=…)")
+    print()
+    print("  bin_strategy: 'uniform' (equal-width) | 'quantile' (equal-frequency)")
+    print()
     print("AutoML:")
     from merlin.automl import SuccessiveHalving
 
