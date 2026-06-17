@@ -1,20 +1,28 @@
 """
-AglScript - A Chomsky Type-3 Regular Scripting Language (Go Syntax)
+GolfScript - A Chomsky Type-3 Regular Scripting Language (Go Syntax)
+
 Constraints enforced:
-  - Max brace nesting depth: 3 (package → func → block)
-  - Max statements per block: 4 (unrolled finite states)
+  - Max brace nesting depth: 3 (package -> func -> block)
+  - Max statements per block: 8 (unrolled finite states)
   - No nested function definitions (flat structure only)
-  - Right-linear grammar translation → deterministic O(n) parsing
+  - Right-linear grammar translation -> deterministic O(n) parsing
   - Valid Go syntax subset (package, func, basic types)
+
+Python API:
+  from boascript import Golf
+  g = Golf(source)
+  result = g.execute("func_name", arg1, arg2, ...)
 """
 
 import sys
 from dataclasses import dataclass
+from enum import Enum
 from typing import Any, Dict, List, Optional
 
 
-# ======================== LEXER ========================
-class TokenType:
+# ======================== TOKEN TYPES ========================
+class TokenType(Enum):
+    # Keywords
     PACKAGE = "PACKAGE"
     FUNC = "FUNC"
     IF = "IF"
@@ -23,20 +31,31 @@ class TokenType:
     RETURN = "RETURN"
     BREAK = "BREAK"
     VAR = "VAR"
+    IMPORT = "IMPORT"
+
+    # Types
     INT_TYPE = "INT_TYPE"
     STRING_TYPE = "STRING_TYPE"
     FLOAT_TYPE = "FLOAT_TYPE"
+
+    # Literals
     INT_LIT = "INT_LIT"
     FLOAT_LIT = "FLOAT_LIT"
     STRING_LIT = "STRING_LIT"
+
+    # Identifiers and operators
     IDENT = "IDENT"
     OP = "OP"
+
+    # Delimiters
     LBRACE = "LBRACE"
     RBRACE = "RBRACE"
     LPAREN = "LPAREN"
     RPAREN = "RPAREN"
     LBRACKET = "LBRACKET"
     RBRACKET = "RBRACKET"
+
+    # Punctuation
     ASSIGN = "ASSIGN"
     SHORT_ASSIGN = "SHORT_ASSIGN"
     COMMA = "COMMA"
@@ -47,12 +66,28 @@ class TokenType:
 
 @dataclass
 class Token:
-    type: str
+    type: TokenType
     value: Any
 
 
-KEYWORDS = {"package", "func", "if", "else", "for", "return", "break", "var"}
-TYPES = {"int", "string", "float64"}
+# ======================== LEXER ========================
+KEYWORDS = {
+    "package": TokenType.PACKAGE,
+    "func": TokenType.FUNC,
+    "if": TokenType.IF,
+    "else": TokenType.ELSE,
+    "for": TokenType.FOR,
+    "return": TokenType.RETURN,
+    "break": TokenType.BREAK,
+    "var": TokenType.VAR,
+    "import": TokenType.IMPORT,
+}
+
+TYPES = {
+    "int": TokenType.INT_TYPE,
+    "string": TokenType.STRING_TYPE,
+    "float64": TokenType.FLOAT_TYPE,
+}
 
 
 def tokenize(source: str) -> List[Token]:
@@ -72,21 +107,28 @@ def tokenize(source: str) -> List[Token]:
                 i += 1
             continue
 
-        # Integer literals
-        if ch.isdigit():
-            start = i
-            while i < len(source) and source[i].isdigit():
-                i += 1
-            tokens.append(Token(TokenType.INT_LIT, int(source[start:i])))
-            continue
-
-        # Float literals
+        # Float literals (must check before integers)
         if ch == "." and i + 1 < len(source) and source[i + 1].isdigit():
             start = i
             i += 1
             while i < len(source) and source[i].isdigit():
                 i += 1
             tokens.append(Token(TokenType.FLOAT_LIT, float(source[start:i])))
+            continue
+
+        # Integer literals
+        if ch.isdigit():
+            start = i
+            while i < len(source) and source[i].isdigit():
+                i += 1
+            # Check for float literal (e.g., 3.14)
+            if i < len(source) and source[i] == "." and i + 1 < len(source) and source[i + 1].isdigit():
+                i += 1
+                while i < len(source) and source[i].isdigit():
+                    i += 1
+                tokens.append(Token(TokenType.FLOAT_LIT, float(source[start:i])))
+            else:
+                tokens.append(Token(TokenType.INT_LIT, int(source[start:i])))
             continue
 
         # Identifiers and keywords
@@ -96,28 +138,10 @@ def tokenize(source: str) -> List[Token]:
                 i += 1
             word = source[start:i]
 
-            if word == "package":
-                tokens.append(Token(TokenType.PACKAGE, word))
-            elif word == "func":
-                tokens.append(Token(TokenType.FUNC, word))
-            elif word == "if":
-                tokens.append(Token(TokenType.IF, word))
-            elif word == "else":
-                tokens.append(Token(TokenType.ELSE, word))
-            elif word == "for":
-                tokens.append(Token(TokenType.FOR, word))
-            elif word == "return":
-                tokens.append(Token(TokenType.RETURN, word))
-            elif word == "break":
-                tokens.append(Token(TokenType.BREAK, word))
-            elif word == "var":
-                tokens.append(Token(TokenType.VAR, word))
-            elif word == "int":
-                tokens.append(Token(TokenType.INT_TYPE, word))
-            elif word == "string":
-                tokens.append(Token(TokenType.STRING_TYPE, word))
-            elif word == "float64":
-                tokens.append(Token(TokenType.FLOAT_TYPE, word))
+            if word in KEYWORDS:
+                tokens.append(Token(KEYWORDS[word], word))
+            elif word in TYPES:
+                tokens.append(Token(TYPES[word], word))
             else:
                 tokens.append(Token(TokenType.IDENT, word))
             continue
@@ -176,12 +200,27 @@ def tokenize(source: str) -> List[Token]:
     return tokens
 
 
-# ======================== PARSER (FSA-driven / Type-3) ========================
+# ======================== PARSER ========================
 MAX_DEPTH = 3
-MAX_STMTS_BLOCK = 4
+MAX_STMTS_BLOCK = 8
+
+# Operator precedence (higher = tighter binding)
+PRECEDENCE = {
+    "+": 1,
+    "-": 1,
+    "*": 2,
+    "/": 2,
+    "%": 2,
+    "<": 0,
+    ">": 0,
+    "==": 0,
+    "!=": 0,
+    "<=": 0,
+    ">=": 0,
+}
 
 
-class AglScriptParser:
+class Parser:
     def __init__(self, tokens: List[Token]):
         self.tokens = tokens
         self.pos = 0
@@ -190,12 +229,12 @@ class AglScriptParser:
     def peek(self) -> Token:
         return self.tokens[self.pos] if self.pos < len(self.tokens) else Token(TokenType.EOF, None)
 
-    def consume(self, expected_type: str = None, expected_val: str = None) -> Token:
+    def consume(self, expected_type: TokenType = None, expected_val: str = None) -> Token:
         tok = self.peek()
         if tok.type == TokenType.EOF:
             raise SyntaxError("Unexpected EOF")
         if expected_type and tok.type != expected_type:
-            raise SyntaxError(f"Expected {expected_type}, got {tok.type}")
+            raise SyntaxError(f"Expected {expected_type.value}, got {tok.type.value}")
         if expected_val and tok.value != expected_val:
             raise SyntaxError(f"Expected '{expected_val}', got '{tok.value}'")
         self.pos += 1
@@ -207,11 +246,19 @@ class AglScriptParser:
         self.consume(TokenType.IDENT, "main")
 
         while self.peek().type != TokenType.EOF:
-            if self.peek().type == TokenType.FUNC:
+            tok = self.peek()
+            if tok.type == TokenType.FUNC:
                 nodes.append(self.parse_func_decl())
+            elif tok.type == TokenType.IMPORT:
+                nodes.append(self.parse_import())
             else:
-                raise SyntaxError(f"Expected 'func', got '{self.peek().value}'")
+                raise SyntaxError(f"Expected 'func' or 'import', got '{tok.value}'")
         return nodes
+
+    def parse_import(self) -> Dict:
+        self.consume(TokenType.IMPORT)
+        path = self.consume(TokenType.STRING_LIT).value
+        return {"type": "import", "path": path}
 
     def parse_func_decl(self) -> Dict:
         self.consume(TokenType.FUNC)
@@ -233,7 +280,11 @@ class AglScriptParser:
         # Return type (optional)
         ret_type = None
         if self.peek().type not in (TokenType.LBRACE, TokenType.EOF):
-            if self.peek().type in (TokenType.INT_TYPE, TokenType.STRING_TYPE, TokenType.FLOAT_TYPE):
+            if self.peek().type in (
+                TokenType.INT_TYPE,
+                TokenType.STRING_TYPE,
+                TokenType.FLOAT_TYPE,
+            ):
                 ret_type = self.parse_type()
 
         # Type-3 Depth Constraint
@@ -246,7 +297,13 @@ class AglScriptParser:
         self.depth -= 1
         self.consume(TokenType.RBRACE)
 
-        return {"type": "func", "name": name, "params": params, "ret_type": ret_type, "body": body}
+        return {
+            "type": "func",
+            "name": name,
+            "params": params,
+            "ret_type": ret_type,
+            "body": body,
+        }
 
     def parse_type(self) -> str:
         tok = self.peek()
@@ -255,7 +312,11 @@ class AglScriptParser:
             self.consume(TokenType.RBRACKET)
             base = self.parse_type()
             return f"[]{base}"
-        if tok.type in (TokenType.INT_TYPE, TokenType.STRING_TYPE, TokenType.FLOAT_TYPE):
+        if tok.type in (
+            TokenType.INT_TYPE,
+            TokenType.STRING_TYPE,
+            TokenType.FLOAT_TYPE,
+        ):
             self.consume()
             return tok.value
         raise SyntaxError(f"Expected type, got '{tok.value}'")
@@ -366,7 +427,13 @@ class AglScriptParser:
         self.depth -= 1
         self.consume(TokenType.RBRACE)
 
-        return {"type": "for", "init": init, "cond": cond, "post": post, "body": body}
+        return {
+            "type": "for",
+            "init": init,
+            "cond": cond,
+            "post": post,
+            "body": body,
+        }
 
     def parse_for_init(self) -> Dict:
         tok = self.peek()
@@ -395,7 +462,11 @@ class AglScriptParser:
     def parse_return(self) -> Dict:
         self.consume(TokenType.RETURN)
         val = None
-        if self.peek().type not in (TokenType.SEMICOLON, TokenType.RBRACE, TokenType.EOF):
+        if self.peek().type not in (
+            TokenType.SEMICOLON,
+            TokenType.RBRACE,
+            TokenType.EOF,
+        ):
             val = self.parse_expr()
         self.expect_semicolon()
         return {"type": "return", "value": val}
@@ -408,7 +479,7 @@ class AglScriptParser:
         left = self.parse_primary()
         while True:
             tok = self.peek()
-            if tok.type == TokenType.OP and tok.value in ("+", "-", "*", "/", "%", "<", ">", "==", "!=", "<=", ">="):
+            if tok.type == TokenType.OP and tok.value in PRECEDENCE:
                 op = self.consume().value
                 right = self.parse_primary()
                 left = {"type": "binop", "left": left, "op": op, "right": right}
@@ -462,7 +533,11 @@ class AglScriptParser:
             # Check for []type{...} Go slice literal
             if self.peek().type == TokenType.RBRACKET:
                 self.consume()
-                if self.peek().type in (TokenType.INT_TYPE, TokenType.STRING_TYPE, TokenType.FLOAT_TYPE):
+                if self.peek().type in (
+                    TokenType.INT_TYPE,
+                    TokenType.STRING_TYPE,
+                    TokenType.FLOAT_TYPE,
+                ):
                     self.parse_type()
                     self.consume(TokenType.LBRACE)
                     elements = []
@@ -491,16 +566,44 @@ class AglScriptParser:
         raise SyntaxError(f"Unexpected token: {tok}")
 
 
+# ======================== BUILT-IN FUNCTIONS ========================
+def builtin_println(args: List[Any]) -> None:
+    print(*args)
+
+
+def builtin_len(args: List[Any]) -> int:
+    return len(args[0]) if args else 0
+
+
+def builtin_append(args: List[Any]) -> list:
+    lst = list(args[0])
+    lst.append(args[1])
+    return lst
+
+
+BUILTINS = {
+    "println": builtin_println,
+    "len": builtin_len,
+    "append": builtin_append,
+}
+
+
 # ======================== EXECUTOR ========================
-class AglScriptExecutor:
+class Executor:
     def __init__(self):
         self.env: Dict[str, Any] = {}
         self.functions: Dict[str, Dict] = {}
+        self.modules: Dict[str, Dict] = {}
 
-    def run(self, program: List[Dict]) -> Optional[Any]:
+    def register_functions(self, program: List[Dict]) -> None:
+        """Register functions from program without executing main."""
         for node in program:
             if node["type"] == "func":
                 self.functions[node["name"]] = node
+
+    def run(self, program: List[Dict]) -> Optional[Any]:
+        """Execute program starting from main()."""
+        self.register_functions(program)
 
         if "main" not in self.functions:
             raise RuntimeError("No main function defined")
@@ -589,7 +692,10 @@ class AglScriptExecutor:
             return None
 
         if t == "return":
-            return {"type": "return", "value": self.eval(node["value"]) if node["value"] else None}
+            return {
+                "type": "return",
+                "value": self.eval(node["value"]) if node["value"] else None,
+            }
 
         if t == "break":
             return {"type": "break"}
@@ -672,29 +778,87 @@ class AglScriptExecutor:
             func_name = node["func"]
             args = [self.eval(a) for a in node["args"]]
 
-            if func_name == "println":
-                print(*args)
-                return None
-            elif func_name == "len":
-                return len(args[0]) if args else 0
-            elif func_name == "append":
-                lst = list(args[0])
-                lst.append(args[1])
-                return lst
+            # Check builtins first
+            if func_name in BUILTINS:
+                return BUILTINS[func_name](args)
+
+            # Check modules
+            for module in self.modules.values():
+                if func_name in module:
+                    return module[func_name](args)
 
             return self.call_function(func_name, args)
 
         raise RuntimeError(f"Unknown expression: {t}")
 
 
+# ======================== PYTHON API ========================
+class Golf:
+    """
+    A GolfScript program that can be called from Python.
+
+    Usage:
+        src = '''
+        package main
+
+        func add(a int, b int) int {
+            return a + b
+        }
+        '''
+
+        g = Golf(src)
+        result = g.execute("add", 3, 4)  # returns 7
+    """
+
+    def __init__(self, source: str):
+        self.source = source
+        self._executor = None
+        self._ast = None
+        self._parse()
+
+    def _parse(self):
+        tokens = tokenize(self.source)
+        parser = Parser(tokens)
+        self._ast = parser.parse_program()
+        self._executor = Executor()
+        self._executor.register_functions(self._ast)
+
+    def execute(self, func_name: str, *args) -> Any:
+        """
+        Call a GolfScript function with Python arguments.
+
+        Args:
+            func_name: Name of the function to call
+            *args: Python values to pass as arguments
+
+        Returns:
+            The return value from the GolfScript function
+
+        Raises:
+            RuntimeError: If function is not found or execution fails
+        """
+        return self._executor.call_function(func_name, list(args))
+
+    def get_function(self, func_name: str) -> Dict:
+        """Get the AST node for a function."""
+        if func_name not in self._executor.functions:
+            raise RuntimeError(f"Function '{func_name}' not defined")
+        return self._executor.functions[func_name]
+
+    def list_functions(self) -> List[str]:
+        """List all defined function names."""
+        return list(self._executor.functions.keys())
+
+
 # ======================== DRIVER ========================
 def run_script(source: str):
+    """Run a GolfScript program (legacy API)."""
     try:
         tokens = tokenize(source)
-        parser = AglScriptParser(tokens)
+        parser = Parser(tokens)
         ast = parser.parse_program()
 
-        executor = AglScriptExecutor()
+        executor = Executor()
         result = executor.run(ast)
         return result
     except Exception as e:
@@ -703,7 +867,8 @@ def run_script(source: str):
 
 
 if __name__ == "__main__":
-    EXAMPLE = """package main
+    EXAMPLE = """
+package main
 
 func clamp(val int, minVal int, maxVal int) int {
     if val < minVal {
@@ -739,4 +904,14 @@ func main() {
     }
 }
 """
-    run_script(EXAMPLE)
+
+    # Demo: using the Golf API from Python
+    print("=== Golf API Demo ===")
+    g = Golf(EXAMPLE)
+    print(f"Functions: {g.list_functions()}")
+    print("\nCalling processList([3, -2, 8, 11, 0]):")
+    result = g.execute("processList", [3, -2, 8, 11, 0])
+    print(f"Result: {result}")
+    print("\nCalling clamp(15, 0, 10):")
+    result = g.execute("clamp", 15, 0, 10)
+    print(f"Result: {result}")
